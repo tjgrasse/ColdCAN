@@ -1,0 +1,46 @@
+{
+    "simDetails": {
+      "title": "Speed Sim",
+      "description": "Blah Blah Blah",
+      "author": "Brian Terrell",
+      "email": "terrelbr@oregonstate.edu"
+    },
+    "NAME": {
+      "arbAddrCapable": true,
+      "indGrp": 7,
+      "vSystemInst": 15,
+      "vSystem": 127,
+      "function": 255,
+      "ECUInst": 7,
+      "mfgCode": 2047,
+      "ID": 2097151
+    },
+    "PGUArray": [
+        {
+            "Label": "Speed Sender",
+            "simVisible": true,
+            "txRate": 5000,
+            "dataLngth": 8,
+            "DP": 0,
+            "PDUF": 200,
+            "PDUS": 128,
+            "priority": 7,
+            "PGN": 5404,
+            "SPNArray": [
+                {
+                    "Label": "Speed",
+                    "simVisible": true,
+                    "simMutable": true,
+                    "dataLngth": 8,
+                    "resolution": 1,
+                    "startBit": 17,
+                    "loLimit": 0,
+                    "hiLimit": 255,
+                    "type": "measured",
+                    "unit": "MPH",
+                    "SPN": 7004
+                }
+           ]
+        }
+    ]
+}
