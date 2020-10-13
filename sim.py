@@ -1,9 +1,9 @@
 # Import the necessary libraries
-import vcan
+from vcan import SetupVirtualCanInterface
 
 if __name__ == "__main__":
     #setup the interfaces
-    if vcan.SetupVirtualCanInterface() == 0:
+    if SetupVirtualCanInterface() == 0:
         print("vcan is up and running for simulator")
         
     else:
