@@ -1,6 +1,4 @@
 # Import the necessary libraries
-import sys
-import os
 import vcan
 
 if __name__ == "__main__":
