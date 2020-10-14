@@ -33,7 +33,9 @@
                     "simMutable": true,
                     "dataLngth": 8,
                     "resolution": 1,
+                    "offset": 0,
                     "startBit": 17,
+                    "initialValue": 0,
                     "loLimit": 0,
                     "hiLimit": 255,
                     "type": "measured",
@@ -43,4 +45,6 @@
            ]
         }
     ]
+  }
 }
+
