@@ -2,8 +2,6 @@ import fileMgr as fM
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
-import dispFmat as dF 
-
 
 
 class simulatorWindow:
