@@ -1,0 +1,123 @@
+{
+    "simDetails":{
+        "title":"Speed Sim",
+        "description":"Blah Blah Blah",
+        "author":"Brian Terrell",
+        "email":"terrelbr@oregonstate.edu"
+    },
+    "NAME":{
+        "arbAddrCapable":true,
+        "indGrp":7,
+        "vSystemInst":15,
+        "vSystem":127,
+        "function":255,
+        "ECUInst":7,
+        "mfgCode":2047,
+        "ID":2097151
+    },
+    "PGUDict":{
+        "5404":{
+            "Label":"Speed Sender",
+            "simVisible":true,
+            "txRate":5000,
+            "dataLngth":8,
+            "DP":0,
+            "PDUF":200,
+            "PDUS":128,
+            "srcAdd":255,
+            "priority":7,
+            "PGN":5404,
+            "SPNDict":{
+                "7004":{
+                    "Label":"Speed",
+                    "simVisible":true,
+                    "simMutable":true,
+                    "dataLngth":8,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":17,
+                    "initialValue":250,
+                    "loLimit":0,
+                    "hiLimit":255,
+                    "type":"measured",
+                    "unit":"MPH",
+                    "SPN":7004
+                },
+                "7005":{
+                    "Label":"Speed Freq",
+                    "simVisible":true,
+                    "simMutable":true,
+                    "dataLngth":16,
+                    "resolution":10,
+                    "offset":0,
+                    "startBit":32,
+                    "initialValue":5,
+                    "loLimit":0,
+                    "hiLimit":255,
+                    "type":"measured",
+                    "unit":"Hz",
+                    "SPN":7005
+                },
+                "7006":{
+                    "Label":"Speed Test",
+                    "simVisible":true,
+                    "simMutable":true,
+                    "dataLngth":1,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":0,
+                    "initialValue":0,
+                    "loLimit":0,
+                    "hiLimit":1,
+                    "type":"status",
+                    "unit":"",
+                    "SPN":7006
+                }
+            }
+        },
+        "5505":{
+            "Label":"Oil Temp Sender",
+            "simVisible":true,
+            "txRate":5000,
+            "dataLngth":8,
+            "DP":0,
+            "PDUF":200,
+            "PDUS":128,
+            "srcAdd":25,
+            "priority":7,
+            "PGN":5055,
+            "SPNDict":{
+                "7099":{
+                    "Label":"Oil Temp",
+                    "simVisible":true,
+                    "simMutable":true,
+                    "dataLngth":8,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":0,
+                    "initialValue":0,
+                    "loLimit":0,
+                    "hiLimit":255,
+                    "type":"measured",
+                    "unit":"Deg F",
+                    "SPN":7099
+                },
+                "7033":{
+                    "Label":"Oil Temp Test",
+                    "simVisible":true,
+                    "simMutable":true,
+                    "dataLngth":1,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":0,
+                    "initialValue":1,
+                    "loLimit":0,
+                    "hiLimit":1,
+                    "type":"status",
+                    "unit":"",
+                    "SPN":7033
+                }
+            }
+        }
+    }
+}
