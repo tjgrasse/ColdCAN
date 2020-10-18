@@ -69,13 +69,4 @@ def get_SPNDict (PGUDict):
 	SPNDict = PGUDict["SPNDict"]
 	return SPNDict
 
-if __name__ == "__main__":
-	#print(FindConfigFiles())
-	
-	#print(OpenConfigFile("simconfig.json"))
-	configDict = OpenConfigFile("simconfig.json")
-	print(get_simDetails(configDict))
-	print(get_NAME(configDict))
-	print(get_PGUDict(configDict))
-	#Fprint(get_SPNArray(get_PGUArray(configDict)[0]))
-	print(len(get_PGUDict(configDict)))
+

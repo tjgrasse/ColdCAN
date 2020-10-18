@@ -220,14 +220,3 @@ class simulatorWindow:
 	#TODO WEEK 4
 	def StopSim():
 		pass
-
-if __name__ == "__main__":
-    #root = initMainSimWindow()
-    #initMainFrame(root)
-    configDict = fM.OpenConfigFile("simconfig.json")
-    #PGUs = fileMgr.get_PGUDict(configDict)
-    root = tk.Tk()
-    sim = simulatorWindow(root, configDict)
-    sim.initMainSimWindow()
-    #simulatorWindow(root).pack(side="top", fill="both", expand=True)
-    root.mainloop()
