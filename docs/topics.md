@@ -32,3 +32,34 @@ The `PgnUpdater` topic will be sent from the builder layer down to the sender la
 ```
 A dictionary must be created of the values and then passed into `payload=` when sending.
 
+### SPNValUpdater
+The `SPNValueUpdate` topic will be sent from the UI layer down to the builder layer to update a specific SPN.
+```
+{
+    "SPN": {
+        "id": int,          // Integer ID of the SPN to be updated.
+
+        "dataLngth": int,	// Length of data in number of bits (1-64).
+
+        "resolution": int,	// Resolution factor applied to the raw value.
+
+        "offset": int,		// Offest applied to the raw value.
+
+        "startBit": int,	// Starting bit od the SPN in the PGN message frame.
+
+        "currentVal": int,	// New value of the SPN.
+    }
+    "pgn": {
+        "id": int,          // Integer ID of the PGN to be updated.
+
+        "priority": int,    // Integer priority of the message (0-7)
+
+        "dp": int,          // Integer extended data page selector (0 or 1)
+
+        "sa": int,          // Integer Source Address (0-254)
+
+        "rate": int         // Rate the PGN will send in decimal seconds
+    }
+}
+```
+A dictionary must be created of the values and then passed into `payload=` when sending.
