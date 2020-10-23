@@ -3,7 +3,6 @@ from vcan import SetupVirtualCanInterface
 from sender import SenderMain
 from builder import BuilderMain
 from test import TestMain
-from pubsub import pub
 
 import threading
 import time
@@ -58,7 +57,6 @@ if __name__ == "__main__":
         # Here starts the main loop
         while True:
             root.mainloop()  #This currently blocks the main loop unil the window is closed, the the test suite take over.
-            #print("Shutting down the program, killing threads")
         
     else:
         log.error("Unable to start vcan, exiting simulator")
