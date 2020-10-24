@@ -1,6 +1,7 @@
 # Import the necessary libraries
-import can
 from pubsub import pub
+import logging as log
+import can
 import time
 import threading # not sure about this one
 
@@ -20,7 +21,7 @@ ReceiverInitialized = False
 '''
 def AddUpdatePgn(pgn, taskInstance):
     global SendingPgns
-    print("Adding PGN " + pgn)
+    log.debug("Adding PGN " + pgn)
     SendingPgns[pgn] = taskInstance
 
 '''
@@ -31,7 +32,7 @@ def AddUpdatePgn(pgn, taskInstance):
 '''
 def CheckForPgn(pgn):
     global SendingPgns
-    print("Checking for PGN " + pgn)
+    log.debug("Checking for PGN " + pgn)
     if pgn in SendingPgns:
         return SendingPgns.get(pgn)
     else:
@@ -45,7 +46,7 @@ def CheckForPgn(pgn):
 '''
 def RemovingPgn(pgn):
     global SendingPgns
-    print("Removing PGN " + pgn)
+    log.debug("Removing PGN " + pgn)
     SendingPgns.pop(pgn)
 
 # Functions that invoke the can library
@@ -58,7 +59,7 @@ def RemovingPgn(pgn):
 def SetupTheBus():
     # Information on how to send data periodically is located in the socketcan documentation
     # https://python-can.readthedocs.io/en/master/interfaces/socketcan.html#can.interfaces.socketcan.SocketcanBus
-    print("Starting the bus")
+    log.info("Starting the bus")
     global bus
     bus = can.interfaces.socketcan.SocketcanBus(channel='vcan0')
 
@@ -71,7 +72,7 @@ def SetupTheBus():
 def ShutdownTheBus():
     # Information on how to send data periodically is located in the socketcan documentation
     # https://python-can.readthedocs.io/en/master/interfaces/socketcan.html#can.interfaces.socketcan.SocketcanBus.shutdown
-    print("Killing all Periodic Tasks")
+    log.info("Killing all Periodic Tasks")
     global bus
     bus.shutdown()
 
@@ -113,24 +114,20 @@ def UpdatePeriodicMessage(message, task):
     # https://python-can.readthedocs.io/en/master/interfaces/socketcan.html#can.interfaces.socketcan.CyclicSendTask.modify_data
     task.modify_data(message)
 
-# This function is not completed yet
-def InitializeReceiver():
-    global ReceiverInitialized
-    ReceiverInitialized = True
-
 # Subscribing Functions
 '''
-    Name:   CreateListeners
-    Desc:   Creates the listeners for the pub/sub
+    Name:   InitializeSender
+    Desc:   Creates the listeners for the pub/sub in the sender
     Param:  none
     Return: none
 '''
-def CreateListeners():
+def InitializeSender():
     # Details on how to subscribe and use a lisener was obtained from the pub/sub documentation
     # https://pypubsub.readthedocs.io/en/v4.0.3/usage/usage_basic.html
     pub.subscribe(ReceivePgn, 'PgnUpdater')
     pub.subscribe(BusHandling, "BusStatus")
 
+# Listener Functions working with Pub/Sub
 '''
     Name:   BusHandling
     Desc:   Callback function when subscribing to BusStatus.  Starts or stops the bus based on a message
@@ -139,7 +136,7 @@ def CreateListeners():
     Return: none
 '''
 def BusHandling(payload=None):
-    print("Received Bus Handling Data: ", payload)
+    log.debug("%s", payload)
 
     global ActiveBus
     status = payload["status"]
@@ -154,7 +151,7 @@ def BusHandling(payload=None):
             # If status is stop and the bus is current enabled, then disable it
             ShutdownTheBus()
     else:
-        print("Invalid string for status=", status)
+        log.error("Invalid string for status=%s", status)
 
 '''
     Name:   ReceivePgn
@@ -165,7 +162,7 @@ def BusHandling(payload=None):
     Return: none
 '''
 def ReceivePgn(payload=None):
-    print("Received PGN Data: ", payload)
+    log.debug("%s", payload)
 
     # Get the payload information
     pgn = payload["pgn"]
@@ -177,9 +174,11 @@ def ReceivePgn(payload=None):
     instance = CheckForPgn(str(pgn))
     if instance == -1:
         # If it is not in the dictionary, create a new periodic message
+        log.debug("no instance found for PGN %d, creating a new periodic message", pgn)
         CreateNewPeriodic(pgn, message, rate)
     else:
         # If it is in the dictionary, update the periodic message
+        log.debug("Instance found for PGN %d, updating the periodic message", pgn)
         UpdatePeriodicMessage(message, instance)
 
 '''
@@ -189,14 +188,13 @@ def ReceivePgn(payload=None):
     Return: none
 '''
 def SenderMain():
-    # Create listener for pgn updates
-    CreateListeners()
+    log.debug("Entered")
+    # Initialize the sender
+    InitializeSender()
 
-    # Here is the main loop for the sender layer, this will not exit, if it does the 
-    # tread will exit, this will contain the receiver
+    # Here is the main loop for the sender layer, this will not exit
     while True:
-        # Here we start the receiver
-        if ActiveBus == True: 
-            if ReceiverInitialized == False:
-                InitializeReceiver()
-        
+        # Don't need anything in the main loop, just need the thread to stay up, using pass here.
+        # found this in the python documentation for just this purpose.
+        # https://docs.python.org/3.3/tutorial/controlflow.html#pass-statements
+        pass

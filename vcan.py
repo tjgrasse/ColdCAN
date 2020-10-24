@@ -1,5 +1,6 @@
 # Import the necessary libraries
 import os
+import logging as log
 
 '''
     The information about how to setup the vcan channel was located within the python-can documentation located here:
@@ -69,9 +70,10 @@ def ActivateVcan():
     Return: 0=Success, else fail
 '''
 def SetupVirtualCanInterface():
+    log.debug("Entering")
     if AddVcanKernelModule() != 0:
         # if loading kernel module failed, exit
-        print("AddVcanKernelModule Failed")
+        log.error("AddVcanKernelModule Failed")
         return -1
 
     # Check if vcan device is available
@@ -79,12 +81,12 @@ def SetupVirtualCanInterface():
         # if vcan doesn't exist add it
         if AddVcanInterface() != 0:
             # if unable to add the vcan interface
-            print("AddVcanInterface Failed")
+            log.error("AddVcanInterface Failed")
             return -1
         
         if ActivateVcan() != 0:
             # if unable to activate the vcan, exit
-            print("ActivateVcan Failed")
+            log.error("ActivateVcan Failed")
             return -1
     else:
         # if vcan is available check if it is up
@@ -92,7 +94,7 @@ def SetupVirtualCanInterface():
             # if vcan is not up activate it
             if ActivateVcan() != 0:
                 # if unable to activate the vcan, exit
-                print("ActivateVcan Failed")
+                log.error("ActivateVcan Failed")
                 return -1
     
     return 0
