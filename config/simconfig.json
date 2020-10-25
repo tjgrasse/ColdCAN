@@ -19,14 +19,14 @@
         "5404":{
             "Label":"Speed Sender",
             "simVisible":true,
-            "txRate":5000,
+            "rate":5000,
             "dataLngth":8,
-            "DP":0,
+            "dp":0,
             "PDUF":200,
             "PDUS":128,
-            "srcAdd":255,
+            "sa":255,
             "priority":7,
-            "PGN":5404,
+            "id":5404,
             "SPNDict":{
                 "7004":{
                     "Label":"Speed",
@@ -41,7 +41,7 @@
                     "hiLimit":255,
                     "type":"measured",
                     "unit":"MPH",
-                    "SPN":7004
+                    "id":7004
                 },
                 "7005":{
                     "Label":"Speed Freq",
@@ -56,7 +56,7 @@
                     "hiLimit":255,
                     "type":"measured",
                     "unit":"Hz",
-                    "SPN":7005
+                    "id":7005
                 },
                 "7006":{
                     "Label":"Speed Test",
@@ -71,21 +71,21 @@
                     "hiLimit":1,
                     "type":"status",
                     "unit":"",
-                    "SPN":7006
+                    "id":7006
                 }
             }
         },
         "5505":{
             "Label":"Oil Temp Sender",
             "simVisible":true,
-            "txRate":5000,
+            "rate":5000,
             "dataLngth":8,
-            "DP":0,
+            "dp":0,
             "PDUF":200,
             "PDUS":128,
-            "srcAdd":25,
+            "sa":25,
             "priority":7,
-            "PGN":5055,
+            "id":5055,
             "SPNDict":{
                 "7099":{
                     "Label":"Oil Temp",
@@ -100,7 +100,7 @@
                     "hiLimit":255,
                     "type":"measured",
                     "unit":"Deg F",
-                    "SPN":7099
+                    "id":7099
                 },
                 "7033":{
                     "Label":"Oil Temp Test",
@@ -115,7 +115,7 @@
                     "hiLimit":1,
                     "type":"status",
                     "unit":"",
-                    "SPN":7033
+                    "id":7033
                 }
             }
         }
