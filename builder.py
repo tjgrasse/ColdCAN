@@ -1,6 +1,5 @@
 # Import the necessary libraries
 from pubsub import pub
-import conversion as conv
 import logging as log
 
 EMPTY_PAYLOAD = 0xffffffffffffffff
@@ -123,12 +122,10 @@ def BuildDataPayload(payload, length, resolution, offset, startBit, value):
     log.debug("payload=%s length=%d resolution=%f offset=%d startBit=%d value=%d",
                 hex(payload), length, resolution, offset, startBit, value)
 
-    # First take the metric value and convert to raw
-    rawValue = conv.MetricToRaw(value, resolution, offset)
     # Take the payload and clear out the bits for the template
     template = ClearOutValueLocation(payload, startBit, length)
     # shift the new value over to its place in the byte array
-    newVal = rawValue << startBit
+    newVal = value << startBit
     # OR the new value into the cleared out template to create the payload
     payload = template | newVal
 
@@ -167,8 +164,8 @@ def BuildPayload(payload=None):
     global CurrentId
 
     # Get PGN Data and build the arbitration id
-    pgn = GetValue(payload, "pgn")
-    spn = GetValue(payload, "spn")
+    pgn = GetValue(payload, "PGN")
+    spn = GetValue(payload, "SPN")
 
     # Get the PGN Fields
     priority = GetValue(pgn, "priority")
@@ -183,7 +180,7 @@ def BuildPayload(payload=None):
     resolution = GetValue(spn, "resolution")
     offset = GetValue(spn, "offset")
     startBit = GetValue(spn, "startBit")
-    currentValue = GetValue(spn, "currentValue")
+    currentValue = GetValue(spn, "currentVal")
 
     # Create the arbitration ID (header) of the message
     arbitrationId = BuildArbitrationId(priority, dp, sa, pgnId)
