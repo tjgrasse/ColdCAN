@@ -2,15 +2,20 @@ import fileMgr as fM
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
+from pubsub import pub
+import pprint
+import configVerif as cv
 
-
+#TODO make functions private methods where applicable
 class simulatorWindow:
 	
 	def __init__(self, parent, configDict):
 		self.parent = parent
+		self.configDict = configDict
 		self.PGUDict = fM.get_PGUDict(configDict)
 		self.simDetails = fM.get_simDetails(configDict)
 		self.mainFrame = None
+		self.initData = None
 
 	'''
     	Name:   initMainSimWindow
@@ -19,20 +24,21 @@ class simulatorWindow:
     	Return: None
 	'''
 	def initMainSimWindow(self):
-		self.parent.title("J1939 Simulator")
+		if cv.verifPGN(fM.get_PGUDict(self.configDict)):
+			self.parent.title("J1939 Simulator")
 
-		self.mainFrame = ttk.Frame(self.parent, padding=(10,10))
-		self.mainFrame.pack()
+			self.mainFrame = ttk.Frame(self.parent, padding=(10,10))
+			self.mainFrame.pack()
 
-		titleFont = tkFont.Font(family="Helvetica",size=36,weight="bold")
-		self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
-		self.titleFrame.pack()
-		
-		ttk.Label(self.titleFrame, text='J1939 Simulator Sender', font = titleFont).pack(expand=1, fill=tk.X)
-		
-		self.SimTitle()
-		self.BuildPGURows()
-		self.BuildStopStart()
+			titleFont = tkFont.Font(family="Helvetica",size=36,weight="bold")
+			self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
+			self.titleFrame.pack()
+			
+			ttk.Label(self.titleFrame, text='J1939 Simulator Sender', font = titleFont).pack(expand=1, fill=tk.X)
+			
+			self.__SimTitle()
+			self.__BuildPGURows()
+			self.__BuildStopStart()
 		
 		#TODO FUTURE CONFIGURATION HERE
 
@@ -43,7 +49,7 @@ class simulatorWindow:
 	    Param:  None
 	    Return: None
 	'''
-	def SimTitle(self):
+	def __SimTitle(self):
 		titleFont = tkFont.Font(family="Helvetica",size=16,weight="bold")
 		
 		titleFrame = ttk.Frame(self.mainFrame, padding=(5,5))
@@ -60,14 +66,14 @@ class simulatorWindow:
 	    Param:  Class variables: parent and PGUDict
 	    Return: None
 	'''
-	def BuildPGURows(self):
+	def __BuildPGURows(self):
 		lblFrmFont = tkFont.Font(family="Helvetica",size=10)
-		
+		self.__initSimMsg(self.PGUDict)
 		for PGNKey in self.PGUDict.keys():
 			if self.PGUDict[PGNKey]["simVisible"] == True:
-				PGUFrame = tk.LabelFrame(self.mainFrame, text= self.PGUDict[PGNKey]["Label"] + " - " + str(self.PGUDict[PGNKey]["PGN"]), font=lblFrmFont)
+				PGUFrame = tk.LabelFrame(self.mainFrame, text= self.PGUDict[PGNKey]["Label"] + " - " + str(self.PGUDict[PGNKey]["id"]), font=lblFrmFont)
 				PGUFrame.pack()
-				self.BuildSPNs(self.PGUDict[PGNKey], PGUFrame)
+				self.__BuildSPNs(self.PGUDict[PGNKey], PGUFrame)
 
 
 	'''
@@ -75,58 +81,66 @@ class simulatorWindow:
     	Desc:  	Builds the individual SPN widgets, which are cunstructed from a human 
     			readable value and a set of buttons for changeing the value by calling 
     			a function to build the value and another to build the buttons. 
-    	Param:  PGU dictonary, PGUFrame tkinter frame
+    	Param:  PGU - dictonary object contians PGU and SPN data, 
+    			PGUFrame - tkinter frame to contian PGU
     	Return: None
 	'''
-	def BuildSPNs(self, PGU, PGUFrame):
+	def __BuildSPNs(self, PGU, PGUFrame):
 		lblFrmFont = tkFont.Font(family="Helvetica",size=10)
-		
 		for SPNkey in PGU["SPNDict"].keys():
 			if PGU["SPNDict"][SPNkey]["simVisible"] == True:
 				SPNFrame = tk.LabelFrame(PGUFrame, text=  PGU["SPNDict"][SPNkey]["Label"] + " - " + str(SPNkey), font=lblFrmFont)
 				SPNFrame.pack(padx=5, pady=10, side=tk.LEFT, fill=tk.Y)
-				self.BuildParamValue(PGU["SPNDict"][SPNkey], SPNFrame)
-				self.BuildModButtons(PGU["SPNDict"][SPNkey], SPNFrame, PGU)
+				self.__BuildParamValue(PGU["SPNDict"][SPNkey], SPNFrame)
+				self.__BuildModButtons(PGU["SPNDict"][SPNkey], SPNFrame, PGU)
 
 
 	'''
     	Name:  	BuildParamValue 
-	    Desc:   Initializes and updates the display value and stores the widget object for future modification.  
-    	Param:  SPN, SPNFrame, SPNvalue= None
+	    Desc:   Initializes the display value and stores the widget object for future modification.  
+    	Param:  SPN - dictonary object contians SPN data, 
+    			SPNFrame - tkinter frame to contain SPN
     	Return: None
 	'''
-	#TODO this need to be broken into an initialization and an update function. 
-	def BuildParamValue(self, SPN, SPNFrame, SPNvalue= None):
+ 
+	def __BuildParamValue(self, SPN, SPNFrame):
 		valueFont = tkFont.Font(family="Helvetica",size=18,weight="bold")
 		valueFrame = ttk.Frame(SPNFrame, padding=(20,5))
 		valueFrame.pack()
-		dispVal = self.dispValFmat(SPN, SPNvalue)
+		dispVal = self.__initDispVal(SPN)
 		SPN["UI_Objects"]["dispValLbl"] = ttk.Label(SPNFrame, text= dispVal, font= valueFont)
 		SPN["UI_Objects"]["dispValLbl"].config(anchor="center")
 		SPN["UI_Objects"]["dispValLbl"].pack()
 
 
 	'''
-    	Name:  	BuildParamValue 
-	    Desc:   Initializes and updates the display value and stores the widget object for future modification.  
-    	Param:  SPN, SPNFrame, SPNvalue= None
+    	Name:  	initDispVal 
+	    Desc:   Initializes diplay valu formated string.  
+    	Param:  SPN - dictonary object contians SPN data 
     	Return: None
 	'''
-	#TODO this need to be broken into an initialization and an update function. 
-	def dispValFmat(self, SPN, val):
-		if val != None:
-			rawVal = val 
-		else:
-			rawVal = SPN["initialValue"]
-
-		if "UI_Objects" in SPN.keys():
-			SPN["UI_Objects"]["currentVal"] = rawVal			#TODO this is ugly, FIX
-		else:	
-			temp = {"UI_Objects": {"currentVal": rawVal}} 
-			SPN.update(temp)
+	def __initDispVal(self, SPN):
+		rawVal = SPN["initialValue"]	
+		temp = {"UI_Objects": {"currentVal": rawVal}} 
+		SPN.update(temp)
 		
 		offsetVal = rawVal + SPN["offset"]
-		factoredVal = offsetVal * SPN["resolution"]
+		factoredVal = offsetVal * SPN["resolution"]  #TODO Add in T's convertion lib
+
+		return str(factoredVal) + ' ' + SPN["unit"]
+
+
+	'''
+		Name:  	updateDispVal 
+	    Desc:   Initializes diplay valu formated string.  
+    	Param:  SPN - dictonary object contians SPN data 
+    	Return: None
+	'''
+	def __updateDispVal(self, SPN, val):
+		SPN["UI_Objects"]["currentVal"] = val
+		
+		offsetVal = val + SPN["offset"]
+		factoredVal = offsetVal * SPN["resolution"]				#TODO Add in T's convertion lib
 
 		return str(factoredVal) + ' ' + SPN["unit"]
 
@@ -134,20 +148,22 @@ class simulatorWindow:
 	'''
     	Name: 	BuildModButtons  
     	Desc:   Creates the SPN modifier buttons in the SPN widget
-    	Param:  PN, SPNFrame, PGU
+    	Param:  SPN - dictonary object contians SPN data,
+    			SPNFrame - tkinter frame to contain SPN,
+    			PGU - dictonary object contians PGU data
     	Return: None
 	'''	
-	def BuildModButtons(self, SPN, SPNFrame, PGU):
+	def __BuildModButtons(self, SPN, SPNFrame, PGU):
 		if SPN["simMutable"] == True:
 			modFont = tkFont.Font(family="Helvetica",size=14,weight="bold")
 			
 			buttonFrame = ttk.Frame(SPNFrame, padding=(5,5))
 			buttonFrame.pack()
 		
-			decButton= tk.Button(buttonFrame, text="-", command= lambda: self.DecButtonUpdate(SPN, buttonFrame, PGU), font= modFont)
+			decButton= tk.Button(buttonFrame, text="-", command= lambda: self.__DecButtonUpdate(SPN, buttonFrame, PGU), font= modFont)
 			decButton.grid(row=1, column=1, sticky="ew")
 			
-			incButton= tk.Button(buttonFrame, text="+", command= lambda: self.IncButtonUpdate(SPN, buttonFrame, PGU), font= modFont)
+			incButton= tk.Button(buttonFrame, text="+", command= lambda: self.__IncButtonUpdate(SPN, buttonFrame, PGU), font= modFont)
 			incButton.grid(row=1, column=2, sticky="ew")
 
 
@@ -157,45 +173,51 @@ class simulatorWindow:
 	    Param:  None
 	    Return: None
 	'''
-	def BuildStopStart(self):
+	def __BuildStopStart(self):
 		startstopFont = tkFont.Font(family="Helvetica",size=14,weight="bold")
 		
 		buttonFrame = ttk.Frame(self.mainFrame, padding=(5,5))
 		buttonFrame.pack()
 		
-		startButton= tk.Button(buttonFrame, text="START", command= self.StartSim, font= buttonFrame)
+		startButton= tk.Button(buttonFrame, text="START", command= self.__StartSimMsg, font= buttonFrame)
 		startButton.grid(row=1, column=1, sticky="ew")
 		
-		stopButton= tk.Button(buttonFrame, text="STOP", command= self.StopSim, font= buttonFrame)
+		stopButton= tk.Button(buttonFrame, text="STOP", command= self.__StopSimMsg, font= buttonFrame)
 		stopButton.grid(row=1, column=2, sticky="ew")
 
 
 	'''
 	    Name:   IncButtonUpdate
 	    Desc:   Increments and updates the current value of the SPN 
-	    Param:  SPN, buttonFrame, PGU
+	    Param:  SPN - dictonary object contians PGU data, 
+	    		buttonFrame- tkinter frame to contain Sinc/dec btns, 
+	    		PGU - dictonary object contians PGU data
 	    Return: None
 	'''
-	def IncButtonUpdate(self, SPN, buttonFrame, PGU):
+	def __IncButtonUpdate(self, SPN, buttonFrame, PGU):
 		temp = SPN["UI_Objects"]["currentVal"] + 1
 		if temp <= SPN["hiLimit"]:
-			dispVal = self.dispValFmat(SPN, temp)
+			dispVal = self.__updateDispVal(SPN, temp)
 			SPN["UI_Objects"]["dispValLbl"].config(text=dispVal)
 			SPN["UI_Objects"]["currentVal"] = temp
+			self.__SPNUpdateMsg(PGU, SPN, temp)
 
 
 	'''
 	    Name:   decButtonUpdate
 	    Desc:   decrements and updates the current value of the SPN 
-	    Param:  SPN, buttonFrame, PGU
+	    Param:  SPN - dictonary object contians PGU data, 
+	    		buttonFrame- tkinter frame to contain Sinc/dec btns, 
+	    		PGU - dictonary object contians PGU data
 	    Return: None
 	'''
-	def DecButtonUpdate(self, SPN, buttonFrame, PGU):
+	def __DecButtonUpdate(self, SPN, buttonFrame, PGU):
 		temp = SPN["UI_Objects"]["currentVal"] - 1
 		if temp >= SPN["loLimit"]:
-			dispVal = self.dispValFmat(SPN, temp)
+			dispVal = self.__updateDispVal(SPN, temp)
 			SPN["UI_Objects"]["dispValLbl"].config(text=dispVal)
 			SPN["UI_Objects"]["currentVal"] = temp
+			self.__SPNUpdateMsg(PGU, SPN, temp)
 
 
 	'''
@@ -204,17 +226,117 @@ class simulatorWindow:
 	    Param:  None
 	    Return: None
 	'''
-	#TODO WEEK 4
-	def StartSim():
-		pass
+	def __StartSimMsg(self):
+		message = dict(status="start")
+		pub.__sendMessage('BusStatus', payload=message)
 
 
 	'''
 	    Name: 	StopSim
 	    Desc:   Passes a message down to stop the sender 
 	    Param:  None
-	    Return: 
+	    Return: None
 	'''
-	#TODO WEEK 4
-	def StopSim():
-		pass
+	def __StopSimMsg(self):
+		message = dict(status="stop")
+		pub.__sendMessage('BusStatus', payload=message)
+
+
+	'''
+	    Name: 	UpdateDictComposer
+	    Desc:   Builds update message with new value to pub/sub to builder layer
+	    Param:  SPN - dictonary object contians SPN data, 
+	    		PGU - dictonary object contians PGU data,
+	    		newValue - new SPN value to be updated
+	    Return: tempDict - a formatted and filtered update dictonary
+	    Ref: https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-in-python-taking-union-o
+	'''
+	def __UpdateDictComposer(self, PGU, SPN, newValue):
+		PGNMsg = self.__PGNDictComposer(PGU)
+		SPNMsg = self.__SPNDictComposer(SPN, newValue)
+		tempDict = {**PGNMsg, **SPNMsg}
+		return tempDict
+
+
+	'''
+	    Name: 	PGNDictComposer
+	    Desc:   Builds PGN protion of the update message to pub/sub to builder layer
+	    Param:  PGU - dictonary object contians PGU data,
+	    Return: {"PGN": filteredDict} - a formatted and filtered PGN portion of the update dictonary
+	'''
+	def __PGNDictComposer(self, PGU):
+		filterSet = ["id","priority","dp","sa","rate"]
+		filteredDict = {}
+		
+		for k,v in PGU.items():
+			if k in filterSet:
+				filteredDict[k] = v
+
+		return {"PGN": filteredDict}
+	
+
+	'''
+	    Name: 	SPNDictComposer
+	    Desc:   Builds SPN protion of the update message to pub/sub to builder layer
+	    Param:  SPN - dictonary object contians SPN data,
+	    Return: {"SON": filteredDict} - a formatted and filtered SPN portion of the update dictonary
+	'''
+	def __SPNDictComposer(self, SPN, currentVal = None):
+		filterSet = ["id","dataLngth","resolution","offset","startBit"]
+		filteredDict = {}
+		
+		for k,v in SPN.items():
+			if k in filterSet:
+				filteredDict[k] = v
+		
+		if currentVal == None:
+			filteredDict["currentVal"] = SPN["initialValue"]
+		else:	
+			filteredDict["currentVal"] = currentVal 
+			
+		return {"SPN": filteredDict}
+
+
+	'''
+	    Name: 	SPNUpdateMsg
+	    Desc:   Passes a message down to update a specific SPN 
+	    Param:  SPN - dictonary object contians SPN data, 
+	    		PGU - dictonary object contians PGU data,
+	    		newValue - new SPN value to be updated
+	    Return: None
+	'''
+	def __SPNUpdateMsg(self, PGU, SPN, newValue):
+		message = self.__UpdateDictComposer(PGU, SPN, newValue)
+		print(message)
+		pub.sendMessage('SPNValueUpdate', payload=message)
+
+
+	'''
+	    Name: 	intDictComposer
+	    Desc:   Builds init message with new value to pub/sub to builder layer
+	    Param:  PGUDict - dictonary object contianing all PGU data
+	    Return: initData - a formatted and filtered initialization dictonary
+	    		[{spn:{}, pgn[]}, {spn:{}, pgn[]}]
+				An array of dictionaries that each contain the PGN dict and an array of SPN discts
+	'''
+	def __intDictComposer(self, PGUDict):
+		initData = [] 
+		for PGNKey in self.PGUDict.keys():
+			temp = self.__PGNDictComposer(PGUDict[PGNKey])
+			temp["SPNArry"] = []
+			for SPNKey in PGUDict[PGNKey]["SPNDict"].keys():
+				tmpSPN = self.__SPNDictComposer(PGUDict[PGNKey]["SPNDict"][SPNKey])
+				temp["SPNArry"].append(tmpSPN['SPN'])
+			initData.append(temp)	
+		return initData
+
+
+	'''
+	    Name: 	initSimMsg
+	    Desc:   Passes a message down to initialize a specific SPN    
+	    Param:  PGUDict - dictonary object contianing all PGU data
+	    Return: None
+	'''
+	def __initSimMsg(self, PGUDict):
+		message = self.__intDictComposer(PGUDict)
+		pub.sendMessage('initSim', payload=message)
