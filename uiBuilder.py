@@ -228,7 +228,7 @@ class simulatorWindow:
 	'''
 	def __StartSimMsg(self):
 		message = dict(status="start")
-		pub.__sendMessage('BusStatus', payload=message)
+		pub.sendMessage('BusStatus', payload=message)
 
 
 	'''
@@ -239,7 +239,7 @@ class simulatorWindow:
 	'''
 	def __StopSimMsg(self):
 		message = dict(status="stop")
-		pub.__sendMessage('BusStatus', payload=message)
+		pub.sendMessage('BusStatus', payload=message)
 
 
 	'''

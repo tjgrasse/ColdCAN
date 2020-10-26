@@ -47,7 +47,7 @@ The `SPNValueUpdate` topic will be sent from the UI layer down to the builder la
 
         "startBit": int,	// Starting bit od the SPN in the PGN message frame.
 
-        "currentVal": int,	// New value of the SPN.
+        "currentVal": int,	// New value of the SPN (raw already converted).
     }
     "pgn": {
         "id": int,          // Integer ID of the PGN to be updated.
