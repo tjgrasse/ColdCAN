@@ -254,7 +254,8 @@ class simulatorWindow:
 	def __UpdateDictComposer(self, PGU, SPN, newValue):
 		PGNMsg = self.__PGNDictComposer(PGU)
 		SPNMsg = self.__SPNDictComposer(SPN, newValue)
-		tempDict = {**PGNMsg, **SPNMsg}
+		SPNArry = {"SPNArry": [SPNMsg['SPN']]}
+		tempDict = {**PGNMsg, **SPNArry}
 		return tempDict
 
 
@@ -307,7 +308,6 @@ class simulatorWindow:
 	'''
 	def __SPNUpdateMsg(self, PGU, SPN, newValue):
 		message = self.__UpdateDictComposer(PGU, SPN, newValue)
-		print(message)
 		pub.sendMessage('SPNValueUpdate', payload=message)
 
 
