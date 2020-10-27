@@ -36,7 +36,18 @@ A dictionary must be created of the values and then passed into `payload=` when 
 The `SPNValueUpdate` topic will be sent from the UI layer down to the builder layer to update a specific SPN.
 ```
 {
-    "SPN": {
+    "PGN": {
+        "id": int,          // Integer ID of the PGN to be updated.
+
+        "priority": int,    // Integer priority of the message (0-7)
+
+        "dp": int,          // Integer extended data page selector (0 or 1)
+
+        "sa": int,          // Integer Source Address (0-254)
+
+        "rate": int         // Rate the PGN will send in decimal seconds
+    }
+    "SPNArry": [{
         "id": int,          // Integer ID of the SPN to be updated.
 
         "dataLngth": int,	// Length of data in number of bits (1-64).
@@ -49,9 +60,36 @@ The `SPNValueUpdate` topic will be sent from the UI layer down to the builder la
 
         "currentVal": int,	// New value of the SPN (raw already converted).
     }
+
+    }]
+
+}
+```
+A dictionary must be created of the values and then passed into `payload=` when sending.
+
+
+### initSim
+The `initSim` topic will be sent from the UI layer down to the builder layer to initialize simulator.
+
+The init message passes and array of dictionaries that each contain the PGN dictionary and an array of SPN dictionaries.
+```
+
+initMsg Format:
+
+[
+    {PGN:{}, SPNArry[{SPN},{SPN}]},
+    
+    {PGN:{}, SPNArry[{SPN},{SPN}]},
+    
+    {PGN:{}, SPNArry[{SPN},{SPN}]}
+]
+
+
+PGN Format:
+    
     "pgn": {
         "id": int,          // Integer ID of the PGN to be updated.
-
+        
         "priority": int,    // Integer priority of the message (0-7)
 
         "dp": int,          // Integer extended data page selector (0 or 1)
@@ -60,6 +98,24 @@ The `SPNValueUpdate` topic will be sent from the UI layer down to the builder la
 
         "rate": int         // Rate the PGN will send in decimal seconds
     }
-}
+
+
+SPN Format:
+
+    {
+        "id": int,          // Integer ID of the SPN to be updated.
+
+        "dataLngth": int,   // Length of data in number of bits (1-64).
+
+        "resolution": int,  // Resolution factor applied to the raw value.
+
+        "offset": int,      // Offest applied to the raw value.
+
+        "startBit": int,    // Starting bit od the SPN in the PGN message frame.
+
+        "currentVal": int,  // New value of the SPN.
+    }
+
+
 ```
 A dictionary must be created of the values and then passed into `payload=` when sending.
