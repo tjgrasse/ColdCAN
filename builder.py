@@ -152,14 +152,7 @@ def SendPGN(arbitationId, payload, rate):
     message = dict(pgn=arbitationId, data=pgnData, rate=rate)
     pub.sendMessage('PgnUpdater', payload=message)
 
-# Listener Functions working with Pub/Sub
-'''
-    Name:   BuildPayload
-    Desc:   Receiving function of the SPNValueUpdate topic that will build the message to go to the sender
-    Param:  payload - message payload of the SPNValueUpdate topic
-    Return: none
-'''
-def BuildPayload(payload=None):
+def ExtractPgnSpnData(payload):
     log.debug("%s", payload)
     global CurrentId
 
@@ -218,6 +211,35 @@ def BuildPayload(payload=None):
     log.debug("*** Current Dictionary Contents for Builder App ***")
     log.debug(CurrentId)
 
+# Listener Functions working with Pub/Sub
+'''
+    Name:   BuildPayload
+    Desc:   Receiving function of the SPNValueUpdate topic that will build the message to go to the sender
+    Param:  payload - message payload of the SPNValueUpdate topic
+    Return: none
+'''
+def BuildPayload(payload=None):
+    log.debug("%s", payload)
+    ExtractPgnSpnData(payload)
+
+'''
+    Name:   InitBusData
+    Desc:   Receives the initial messages from the UI that need to go onto the bus to start the simulation.  These
+            values will be received as a large array of PGN/SPN combinations.  The PGNs will all be build one at a time
+            and sent down to the sender to start being sent out on the bus.
+    Param:  payload - message payload of the initSim topic
+    Return: none
+'''
+def InitBusData(payload=None):
+    log.debug("%s", payload)
+    records = len(payload)
+    if len(payload) > 0:
+        log.debug("Initializing the Bus information for %d records", records)
+        for x in payload:
+            ExtractPgnSpnData(payload[x])
+    else:
+        log.debug("Received payload with 0 records, not processing")
+
 '''
     Name:   InitializeBuilder
     Desc:   Sets up the subscription to the SPNValueUpdate topic
@@ -226,6 +248,7 @@ def BuildPayload(payload=None):
 '''
 def InitializeBuilder():
     pub.subscribe(BuildPayload, "SPNValueUpdate")
+    pub.subscribe(InitBusData, "initSim")
 
 '''
     Name:   BuilderMain
