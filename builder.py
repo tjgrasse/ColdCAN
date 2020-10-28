@@ -158,7 +158,6 @@ def ExtractPgnSpnData(payload):
 
     # Get PGN Data and build the arbitration id
     pgn = GetValue(payload, "PGN")
-    spn = GetValue(payload, "SPN")
 
     # Get the PGN Fields
     priority = GetValue(pgn, "priority")
@@ -167,47 +166,40 @@ def ExtractPgnSpnData(payload):
     pgnId = GetValue(pgn, "id")
     rate = GetValue(pgn, "rate")
 
-    # Get the SPN Fields
-    #spnId = GetValue(spn, "id")
-    length = GetValue(spn, "dataLngth")
-    resolution = GetValue(spn, "resolution")
-    offset = GetValue(spn, "offset")
-    startBit = GetValue(spn, "startBit")
-    currentValue = GetValue(spn, "currentVal")
-
     # Create the arbitration ID (header) of the message
     arbitrationId = BuildArbitrationId(priority, dp, sa, pgnId)
 
+    messageData = EMPTY_PAYLOAD
+
     # Check if the header is currently active, this requires that the PGN, SA, DP, and Priority are all the same
     info = CheckForId(arbitrationId)
-    if info == -1:
-        log.debug("No active arbitrationId that matches, creating payload and adding to dictionary")
-
-        # Build the payload of the message
-        payload = BuildDataPayload(EMPTY_PAYLOAD, length, resolution, offset, startBit, currentValue)
-        # Create the dictionary content for the arbitration id, this is the payload and rate
-        values = CreateArbitrationIdData(payload, rate)
-        # Add arbitrationId and content to the dictionary
-        AddUpdateId(arbitrationId, values)
-        # Send the data down to the sender layer to put out onto the bus
-        SendPGN(arbitrationId, payload, rate)
-        
-    else:
+    if info != -1:
         log.debug("Found active arbitrationId %d, updating values", arbitrationId)
 
         # Get the old payload value from the arbitrationId dictionary contents
-        oldPayload = GetValue(info, "payload")
-        # Build the payload of the message
-        updatedPayload = BuildDataPayload(oldPayload, length, resolution, offset, startBit, currentValue)
+        messageData = GetValue(info, "payload")
         # Get the old rate value from the arbitrationId dictionary contents, old rate value should be used just in case it is different
-        oldRate = GetValue(info, "rate")
+        rate = GetValue(info, "rate")
+
+    # Get the SPN Fields
+    spn = GetValue(payload, "SPNArry")
+    for details in spn:
+        length = GetValue(details, "dataLngth")
+        resolution = GetValue(details, "resolution")
+        offset = GetValue(details, "offset")
+        startBit = GetValue(details, "startBit")
+        currentValue = GetValue(details, "currentVal")
+
+        # Build the payload of the message
+        messageData = BuildDataPayload(messageData, length, resolution, offset, startBit, currentValue)
         # Create the dictionary content for the arbitration id, this is the payload and rate
-        values = CreateArbitrationIdData(updatedPayload, oldRate)
+        values = CreateArbitrationIdData(messageData, rate)
         # Add arbitrationId and content to the dictionary
         AddUpdateId(arbitrationId, values)
-        # Send the data down to the sender layer to put out onto the bus
-        SendPGN(arbitrationId, updatedPayload, rate)
-
+        
+    # Send the PGN filled with all the SPN content down to the sender layer
+    SendPGN(arbitrationId, messageData, rate)
+    
     log.debug("*** Current Dictionary Contents for Builder App ***")
     log.debug(CurrentId)
 
@@ -235,8 +227,8 @@ def InitBusData(payload=None):
     records = len(payload)
     if len(payload) > 0:
         log.debug("Initializing the Bus information for %d records", records)
-        for x in payload:
-            ExtractPgnSpnData(payload[x])
+        for value in payload:
+            ExtractPgnSpnData(value)
     else:
         log.debug("Received payload with 0 records, not processing")
 
