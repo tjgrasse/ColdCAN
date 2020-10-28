@@ -74,17 +74,17 @@ The init message passes and array of dictionaries that each contain the PGN dict
 initMsg Format:
 
 [
-    {PGN:{}, SPNArry[{SPN},{SPN}]},
+    {"PGN":{}, "SPNArry":[{SPN},{SPN}]},
     
-    {PGN:{}, SPNArry[{SPN},{SPN}]},
+    {"PGN":{}, "SPNArry":[{SPN},{SPN}]},
     
-    {PGN:{}, SPNArry[{SPN},{SPN}]}
+    {"PGN":{}, "SPNArry":[{SPN},{SPN}]}
 ]
 
 
 PGN Format:
     
-    "pgn": {
+    "PGN": {
         "id": int,          // Integer ID of the PGN to be updated.
         
         "priority": int,    // Integer priority of the message (0-7)
