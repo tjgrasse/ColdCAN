@@ -59,10 +59,7 @@ The `SPNValueUpdate` topic will be sent from the UI layer down to the builder la
         "startBit": int,	// Starting bit od the SPN in the PGN message frame.
 
         "currentVal": int,	// New value of the SPN (raw already converted).
-    }
-
     }]
-
 }
 ```
 A dictionary must be created of the values and then passed into `payload=` when sending.

@@ -152,6 +152,64 @@ def SendPGN(arbitationId, payload, rate):
     message = dict(pgn=arbitationId, data=pgnData, rate=rate)
     pub.sendMessage('PgnUpdater', payload=message)
 
+'''
+    Name:   ExtractPgnSpnData
+    Desc:   Receives payload for a single PGN with its SPN array and creates the message to send to the sender layer
+    Param:  payload - dictionary of the PGN with the SPN Array
+    Return: none
+'''
+def ExtractPgnSpnData(payload):
+    log.debug("%s", payload)
+    global CurrentId
+
+    # Get PGN Data and build the arbitration id
+    pgn = GetValue(payload, "PGN")
+
+    # Get the PGN Fields
+    priority = GetValue(pgn, "priority")
+    dp = GetValue(pgn, "dp")
+    sa = GetValue(pgn, "sa")
+    pgnId = GetValue(pgn, "id")
+    rate = GetValue(pgn, "rate")
+
+    # Create the arbitration ID (header) of the message
+    arbitrationId = BuildArbitrationId(priority, dp, sa, pgnId)
+
+    # Initialize the messageData to an empty payload
+    messageData = EMPTY_PAYLOAD
+
+    # Check if the header is currently active, this requires that the PGN, SA, DP, and Priority are all the same
+    info = CheckForId(arbitrationId)
+    if info != -1:
+        log.debug("Found active arbitrationId %d, updating values", arbitrationId)
+
+        # Get the old payload value from the arbitrationId dictionary contents
+        messageData = GetValue(info, "payload")
+        # Get the old rate value from the arbitrationId dictionary contents, old rate value should be used just in case it is different
+        rate = GetValue(info, "rate")
+
+    # Get the SPN Fields
+    spn = GetValue(payload, "SPNArry")
+    for details in spn:
+        length = GetValue(details, "dataLngth")
+        resolution = GetValue(details, "resolution")
+        offset = GetValue(details, "offset")
+        startBit = GetValue(details, "startBit")
+        currentValue = GetValue(details, "currentVal")
+
+        # Build the payload of the message
+        messageData = BuildDataPayload(messageData, length, resolution, offset, startBit, currentValue)
+        # Create the dictionary content for the arbitration id, this is the payload and rate
+        values = CreateArbitrationIdData(messageData, rate)
+        # Add arbitrationId and content to the dictionary
+        AddUpdateId(arbitrationId, values)
+        
+    # Send the PGN filled with all the SPN content down to the sender layer
+    SendPGN(arbitrationId, messageData, rate)
+    
+    log.debug("*** Current Dictionary Contents for Builder App ***")
+    log.debug(CurrentId)
+
 # Listener Functions working with Pub/Sub
 '''
     Name:   BuildPayload
@@ -161,62 +219,25 @@ def SendPGN(arbitationId, payload, rate):
 '''
 def BuildPayload(payload=None):
     log.debug("%s", payload)
-    global CurrentId
+    ExtractPgnSpnData(payload)
 
-    # Get PGN Data and build the arbitration id
-    pgn = GetValue(payload, "PGN")
-    spn = GetValue(payload, "SPN")
-
-    # Get the PGN Fields
-    priority = GetValue(pgn, "priority")
-    dp = GetValue(pgn, "dp")
-    sa = GetValue(pgn, "sa")
-    pgnId = GetValue(pgn, "id")
-    rate = GetValue(pgn, "rate")
-
-    # Get the SPN Fields
-    #spnId = GetValue(spn, "id")
-    length = GetValue(spn, "dataLngth")
-    resolution = GetValue(spn, "resolution")
-    offset = GetValue(spn, "offset")
-    startBit = GetValue(spn, "startBit")
-    currentValue = GetValue(spn, "currentVal")
-
-    # Create the arbitration ID (header) of the message
-    arbitrationId = BuildArbitrationId(priority, dp, sa, pgnId)
-
-    # Check if the header is currently active, this requires that the PGN, SA, DP, and Priority are all the same
-    info = CheckForId(arbitrationId)
-    if info == -1:
-        log.debug("No active arbitrationId that matches, creating payload and adding to dictionary")
-
-        # Build the payload of the message
-        payload = BuildDataPayload(EMPTY_PAYLOAD, length, resolution, offset, startBit, currentValue)
-        # Create the dictionary content for the arbitration id, this is the payload and rate
-        values = CreateArbitrationIdData(payload, rate)
-        # Add arbitrationId and content to the dictionary
-        AddUpdateId(arbitrationId, values)
-        # Send the data down to the sender layer to put out onto the bus
-        SendPGN(arbitrationId, payload, rate)
-        
+'''
+    Name:   InitBusData
+    Desc:   Receives the initial messages from the UI that need to go onto the bus to start the simulation.  These
+            values will be received as a large array of PGN/SPN combinations.  The PGNs will all be build one at a time
+            and sent down to the sender to start being sent out on the bus.
+    Param:  payload - message payload of the initSim topic
+    Return: none
+'''
+def InitBusData(payload=None):
+    log.debug("%s", payload)
+    records = len(payload)
+    if len(payload) > 0:
+        log.debug("Initializing the Bus information for %d records", records)
+        for value in payload:
+            ExtractPgnSpnData(value)
     else:
-        log.debug("Found active arbitrationId %d, updating values", arbitrationId)
-
-        # Get the old payload value from the arbitrationId dictionary contents
-        oldPayload = GetValue(info, "payload")
-        # Build the payload of the message
-        updatedPayload = BuildDataPayload(oldPayload, length, resolution, offset, startBit, currentValue)
-        # Get the old rate value from the arbitrationId dictionary contents, old rate value should be used just in case it is different
-        oldRate = GetValue(info, "rate")
-        # Create the dictionary content for the arbitration id, this is the payload and rate
-        values = CreateArbitrationIdData(updatedPayload, oldRate)
-        # Add arbitrationId and content to the dictionary
-        AddUpdateId(arbitrationId, values)
-        # Send the data down to the sender layer to put out onto the bus
-        SendPGN(arbitrationId, updatedPayload, rate)
-
-    log.debug("*** Current Dictionary Contents for Builder App ***")
-    log.debug(CurrentId)
+        log.debug("Received payload with 0 records, not processing")
 
 '''
     Name:   InitializeBuilder
@@ -226,6 +247,7 @@ def BuildPayload(payload=None):
 '''
 def InitializeBuilder():
     pub.subscribe(BuildPayload, "SPNValueUpdate")
+    pub.subscribe(InitBusData, "initSim")
 
 '''
     Name:   BuilderMain

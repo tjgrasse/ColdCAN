@@ -146,10 +146,14 @@ def BusHandling(payload=None):
         if ActiveBus == False:
             # If status is start and the bus is currently not on then enable it
             SetupTheBus()
+            log.debug("Setting ActiveBus to True")
+            ActiveBus = True
     elif status == "stop":
         if ActiveBus == True:
             # If status is stop and the bus is current enabled, then disable it
             ShutdownTheBus()
+            log.debug("Setting ActiveBus to False")
+            ActiveBus = False
     else:
         log.error("Invalid string for status=%s", status)
 
@@ -164,22 +168,29 @@ def BusHandling(payload=None):
 def ReceivePgn(payload=None):
     log.debug("%s", payload)
 
-    # Get the payload information
-    pgn = payload["pgn"]
-    rate = payload["rate"]
-    data = payload["data"]
-    message = CreateMessage(pgn, data)
+    # Only put onto the bus if there is an ActiveBus going on
+    if ActiveBus:
+        # Get the payload information
+        pgn = payload["pgn"]
+        rate = payload["rate"]
+        data = payload["data"]
+        message = CreateMessage(pgn, data)
 
-    # Check if pgn is in the dictionary
-    instance = CheckForPgn(str(pgn))
-    if instance == -1:
-        # If it is not in the dictionary, create a new periodic message
-        log.debug("no instance found for PGN %d, creating a new periodic message", pgn)
-        CreateNewPeriodic(pgn, message, rate)
+        # Check if pgn is in the dictionary
+        instance = CheckForPgn(str(pgn))
+        if instance == -1:
+            # If it is not in the dictionary, create a new periodic message
+            log.debug("no instance found for PGN %d, creating a new periodic message", pgn)
+            CreateNewPeriodic(pgn, message, rate)
+        else:
+            # If it is in the dictionary, update the periodic message
+            log.debug("Instance found for PGN %d, updating the periodic message", pgn)
+            UpdatePeriodicMessage(message, instance)
+
     else:
-        # If it is in the dictionary, update the periodic message
-        log.debug("Instance found for PGN %d, updating the periodic message", pgn)
-        UpdatePeriodicMessage(message, instance)
+        log.error("**************************************")
+        log.error("Bus is inactive, will not transmit PGN")
+        log.error("**************************************")
 
 '''
     Name:   SenderMain
