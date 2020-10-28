@@ -168,6 +168,7 @@ def BusHandling(payload=None):
 def ReceivePgn(payload=None):
     log.debug("%s", payload)
 
+    # Only put onto the bus if there is an ActiveBus going on
     if ActiveBus:
         # Get the payload information
         pgn = payload["pgn"]

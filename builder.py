@@ -152,6 +152,12 @@ def SendPGN(arbitationId, payload, rate):
     message = dict(pgn=arbitationId, data=pgnData, rate=rate)
     pub.sendMessage('PgnUpdater', payload=message)
 
+'''
+    Name:   ExtractPgnSpnData
+    Desc:   Receives payload for a single PGN with its SPN array and creates the message to send to the sender layer
+    Param:  payload - dictionary of the PGN with the SPN Array
+    Return: none
+'''
 def ExtractPgnSpnData(payload):
     log.debug("%s", payload)
     global CurrentId
@@ -169,6 +175,7 @@ def ExtractPgnSpnData(payload):
     # Create the arbitration ID (header) of the message
     arbitrationId = BuildArbitrationId(priority, dp, sa, pgnId)
 
+    # Initialize the messageData to an empty payload
     messageData = EMPTY_PAYLOAD
 
     # Check if the header is currently active, this requires that the PGN, SA, DP, and Priority are all the same
