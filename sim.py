@@ -39,12 +39,13 @@ if __name__ == "__main__":
         log.info("vcan is up and running for simulator")
         
         # Create a thread for the sender and the builder, then start them
-        # Details on threading was located at the following webpage, this was used to create the thread
+        # Details on threading was located at the following webpage, this was used to create the thread.  It also
+        # explained how python uses the daemon and why we need this set to true
         # https://docs.python.org/3/library/threading.html#threading.Thread
-        sender = threading.Thread(target=SenderMain)
+        sender = threading.Thread(target=SenderMain, daemon=True)
         sender.start()
 
-        builder = threading.Thread(target=BuilderMain)
+        builder = threading.Thread(target=BuilderMain, daemon=True)
         builder.start()
 
         # Uncomment these two lines to use the test.py file to run tests on the program
