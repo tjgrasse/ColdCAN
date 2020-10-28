@@ -38,9 +38,6 @@ if __name__ == "__main__":
     if SetupVirtualCanInterface() == 0:
         log.info("vcan is up and running for simulator")
         
-        sim = UI.simulatorWindow(root, fM.OpenConfigFile("simconfig.json"))
-        sim.initMainSimWindow()
-        
         # Create a thread for the sender and the builder, then start them
         # Details on threading was located at the following webpage, this was used to create the thread
         # https://docs.python.org/3/library/threading.html#threading.Thread
@@ -54,10 +51,14 @@ if __name__ == "__main__":
         #tester = threading.Thread(target=TestMain)
         #tester.start()
 
+        # Start the UI after the threads have been started
+        sim = UI.simulatorWindow(root, fM.OpenConfigFile("simconfig.json"))
+        sim.initMainSimWindow()
+
         # Here starts the main loop
         while True:
             root.mainloop()  #This currently blocks the main loop unil the window is closed, the the test suite take over.
-        
+
     else:
         log.error("Unable to start vcan, exiting simulator")
 

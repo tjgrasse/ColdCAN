@@ -146,10 +146,14 @@ def BusHandling(payload=None):
         if ActiveBus == False:
             # If status is start and the bus is currently not on then enable it
             SetupTheBus()
+            log.debug("Setting ActiveBus to True")
+            ActiveBus = True
     elif status == "stop":
         if ActiveBus == True:
             # If status is stop and the bus is current enabled, then disable it
             ShutdownTheBus()
+            log.debug("Setting ActiveBus to False")
+            ActiveBus = False
     else:
         log.error("Invalid string for status=%s", status)
 
@@ -183,7 +187,9 @@ def ReceivePgn(payload=None):
             UpdatePeriodicMessage(message, instance)
 
     else:
+        log.error("**************************************")
         log.error("Bus is inactive, will not transmit PGN")
+        log.error("**************************************")
 
 '''
     Name:   SenderMain
