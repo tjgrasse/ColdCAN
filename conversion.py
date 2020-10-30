@@ -24,3 +24,12 @@ def MetricToRaw(value, resolution, offset):
     val = int((value - offset) / resolution)
     log.debug("value=%d resolution=%f offset=%d NewVal=%f", value, resolution, offset, val)
     return val
+
+'''
+    Name:   MillisecondsToSeconds
+    Desc:   Takes integer milliseconds and converts it to float seconds
+    Param:  rate - milliseconds (integer)
+    Return: rate in seconds (float)
+'''
+def MillisecondsToSeconds(rate):
+    return (float(rate) / 1000)
