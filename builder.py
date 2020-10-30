@@ -1,6 +1,7 @@
 # Import the necessary libraries
 from pubsub import pub
 import logging as log
+import time
 
 EMPTY_PAYLOAD = 0xffffffffffffffff
 CurrentId = dict()
@@ -212,6 +213,33 @@ def ExtractPgnSpnData(payload):
 
 # Listener Functions working with Pub/Sub
 '''
+    Name:   BusHandling
+    Desc:   Callback function when subscribing to BusStatus.  builder.py receives a start and then sends out all the 
+            initialized values out onto the bus at their periodic rates to start the data transmission.
+    Param:  payload - BusStatus object, located in the topics.md document
+    Return: none
+'''
+def BusHandling(payload=None):
+    log.debug("%s", payload)
+
+    status = payload["status"]
+    # Get the status value and intrepret it
+    if status == "start":
+        # sleep for 1 second to allow bus to fully init
+        time.sleep(1)
+        # Loop through all dictionary keys
+        for message in CurrentId:
+            # Get the Arbitration ID
+            messageId = message
+            # Get the rate
+            rate = CurrentId[message].get('rate')
+            # Get the payload
+            payload = CurrentId[message].get('payload')
+            # Send it out to the bus
+            SendPGN(messageId, payload, rate)
+
+
+'''
     Name:   BuildPayload
     Desc:   Receiving function of the SPNValueUpdate topic that will build the message to go to the sender
     Param:  payload - message payload of the SPNValueUpdate topic
@@ -248,6 +276,7 @@ def InitBusData(payload=None):
 def InitializeBuilder():
     pub.subscribe(BuildPayload, "SPNValueUpdate")
     pub.subscribe(InitBusData, "initSim")
+    pub.subscribe(BusHandling, "BusStatus")
 
 '''
     Name:   BuilderMain
