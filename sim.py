@@ -59,6 +59,7 @@ if __name__ == "__main__":
         # Here starts the main loop
         while True:
             root.mainloop()  #This currently blocks the main loop unil the window is closed, the the test suite take over.
+            break
 
     else:
         log.error("Unable to start vcan, exiting simulator")
