@@ -75,6 +75,7 @@ def ShutdownTheBus():
     log.info("Killing all Periodic Tasks")
     global bus
     bus.shutdown()
+    SendingPgns.clear()
 
 '''
     Name:   CreateNewPeriodic
