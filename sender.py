@@ -1,5 +1,6 @@
 # Import the necessary libraries
 from pubsub import pub
+from conversion import MillisecondsToSeconds
 import logging as log
 import can
 import time
@@ -88,7 +89,8 @@ def ShutdownTheBus():
 def CreateNewPeriodic(pgn, message, rate):
     # Information on how to send data periodically is located in the socketcan documentation
     # https://python-can.readthedocs.io/en/master/bus.html#can.BusABC.send_periodic
-    instance = bus.send_periodic(message, rate)
+    period = MillisecondsToSeconds(rate)
+    instance = bus.send_periodic(message, period)
     AddUpdatePgn(str(pgn), instance)
 
 '''
