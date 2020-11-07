@@ -33,3 +33,16 @@ def MetricToRaw(value, resolution, offset):
 '''
 def MillisecondsToSeconds(rate):
     return (float(rate) / 1000)
+     
+'''
+    Name:   StrIsFloat
+    Desc:   Takes takes a string and check if valid float
+    Param:  string - a string that should represent a float
+    Return: true if float / false if not float
+'''
+def StrIsFloat(string):
+    try: 
+    	float(string)
+    	return True
+    except ValueError:
+    	return False
