@@ -5,8 +5,8 @@ import tkinter.font as tkFont
 from pubsub import pub
 import pprint
 import configVerif as cv
+import conversion as con
 
-#TODO make functions private methods where applicable
 class simulatorWindow:
 	
 	def __init__(self, parent, configDict):
@@ -22,25 +22,31 @@ class simulatorWindow:
     	Desc:   initialize main window by bulind main composition frame and calling builder functions.  
     	Param:  Class variables: parent and PGUDict
     	Return: None
+    	Ref: 	Event binding to allow a click anywhere in the UI to de-focus the entry is based off 
+    			information found at the following link:
+				https://stackoverflow.com/questions/24072567/remove-focus-from-entry-widget/24072653#24072653
 	'''
 	def initMainSimWindow(self):
+		self.parent.title("J1939 Simulator")
+		
+		self.mainFrame = ttk.Frame(self.parent, padding=(10,10))
+		self.mainFrame.pack()
+		
 		if cv.verifPGN(fM.get_PGUDict(self.configDict)):
-			self.parent.title("J1939 Simulator")
-
-			self.mainFrame = ttk.Frame(self.parent, padding=(10,10))
-			self.mainFrame.pack()
-
 			titleFont = tkFont.Font(family="Helvetica",size=36,weight="bold")
 			self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
-			self.titleFrame.pack()
-			
 			ttk.Label(self.titleFrame, text='J1939 Simulator Sender', font = titleFont).pack(expand=1, fill=tk.X)
-			
+			self.titleFrame.pack()
+			self.parent.bind_all("<1>", lambda event:event.widget.focus_set())
 			self.__SimTitle()
 			self.__BuildPGURows()
 			self.__BuildStopStart()
+		else:
+			titleFont = tkFont.Font(family="Helvetica",size=18,weight="bold")
+			self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
+			ttk.Label(self.titleFrame, text='Configuration file error, please check error log.', font = titleFont).pack(expand=1, fill=tk.X)
+			self.titleFrame.pack()
 		
-		#TODO FUTURE CONFIGURATION HERE
 
 
 	'''
@@ -92,7 +98,7 @@ class simulatorWindow:
 				SPNFrame = tk.LabelFrame(PGUFrame, text=  PGU["SPNDict"][SPNkey]["Label"] + " - " + str(SPNkey), font=lblFrmFont)
 				SPNFrame.pack(padx=5, pady=10, side=tk.LEFT, fill=tk.Y)
 				self.__BuildParamValue(PGU["SPNDict"][SPNkey], SPNFrame)
-				self.__BuildModButtons(PGU["SPNDict"][SPNkey], SPNFrame, PGU)
+				self.__BuildModEntry(PGU["SPNDict"][SPNkey], SPNFrame, PGU)
 
 
 	'''
@@ -102,7 +108,6 @@ class simulatorWindow:
     			SPNFrame - tkinter frame to contain SPN
     	Return: None
 	'''
- 
 	def __BuildParamValue(self, SPN, SPNFrame):
 		valueFont = tkFont.Font(family="Helvetica",size=18,weight="bold")
 		valueFrame = ttk.Frame(SPNFrame, padding=(20,5))
@@ -119,15 +124,10 @@ class simulatorWindow:
     	Param:  SPN - dictonary object contians SPN data 
     	Return: None
 	'''
-	def __initDispVal(self, SPN):
-		rawVal = SPN["initialValue"]	
-		temp = {"UI_Objects": {"currentVal": rawVal}} 
+	def __initDispVal(self, SPN):	
+		temp = {"UI_Objects": {"currentVal": SPN["initialValue"]}} 
 		SPN.update(temp)
-		
-		offsetVal = rawVal + SPN["offset"]
-		factoredVal = offsetVal * SPN["resolution"]  #TODO Add in T's convertion lib
-
-		return str(factoredVal) + ' ' + SPN["unit"]
+		return str(SPN["initialValue"]) + ' ' + SPN["unit"]
 
 
 	'''
@@ -137,34 +137,66 @@ class simulatorWindow:
     	Return: None
 	'''
 	def __updateDispVal(self, SPN, val):
-		SPN["UI_Objects"]["currentVal"] = val
-		
-		offsetVal = val + SPN["offset"]
-		factoredVal = offsetVal * SPN["resolution"]				#TODO Add in T's convertion lib
-
-		return str(factoredVal) + ' ' + SPN["unit"]
+		SPN["UI_Objects"]["currentVal"] = float(val)
+		return str(val) + ' ' + SPN["unit"]
 
 
 	'''
-    	Name: 	BuildModButtons  
-    	Desc:   Creates the SPN modifier buttons in the SPN widget
+    	Name: 	BuildModEntry
+    	Desc:   Creates the SPN modifier entry window in the SPN widget
     	Param:  SPN - dictonary object contians SPN data,
     			SPNFrame - tkinter frame to contain SPN,
     			PGU - dictonary object contians PGU data
     	Return: None
 	'''	
-	def __BuildModButtons(self, SPN, SPNFrame, PGU):
+	def __BuildModEntry(self, SPN, SPNFrame, PGU):
 		if SPN["simMutable"] == True:
 			modFont = tkFont.Font(family="Helvetica",size=14,weight="bold")
-			
-			buttonFrame = ttk.Frame(SPNFrame, padding=(5,5))
-			buttonFrame.pack()
+			entryframe= ttk.Frame(SPNFrame, padding=(5,5))
+			entryframe.pack()
+			SPN["UI_Objects"]["entryVal"] = tk.StringVar()
+			SPN["UI_Objects"]["entry"] = tk.Entry(entryframe, textvariable=SPN["UI_Objects"]["entryVal"])
+			SPN["UI_Objects"]["entry"].grid(row=1, column=1, sticky="ew")
+			SPN["UI_Objects"]["entry"].bind("<1>", lambda event: self.__EntryUpdateBinding(SPN, SPNFrame, PGU))
+
+
+	'''
+    	Name: 	EntryUpdateBinding
+    	Desc:   Creates the SPN modifier entry event bindings
+    	Param:  SPN - dictonary object contians SPN data,
+    			SPNFrame - tkinter frame to contain SPN,
+    			PGU - dictonary object contians PGU data
+    	Return: None
+	'''	
+	def __EntryUpdateBinding(self, SPN, SPNFrame, PGU):
+		SPN["UI_Objects"]["entry"].config(foreground='black')
+		SPNFrame.configure(bd=4)
+		SPN["UI_Objects"]["entry"].bind("<Return>", lambda event: self.parent.focus_set())
+		SPN["UI_Objects"]["entry"].bind("<FocusOut>", lambda event: self.__EntryUpdateAccept(SPN, SPNFrame, PGU))
+
+
+	'''
+    	Name: 	EntryUpdateAccept
+    	Desc:   Verifies user entry and provides feedback in the case of invalid entry. 
+    	Param:  SPN - dictonary object contians SPN data,
+    			SPNFrame - tkinter frame to contain SPN,
+    			PGU - dictonary object contians PGU data
+    	Return: None
+	'''	
+	def __EntryUpdateAccept(self, SPN, SPNFrame, PGU):
+		SPNFrame.configure(bd=2)
+		newEntry = SPN["UI_Objects"]["entry"].get()
 		
-			decButton= tk.Button(buttonFrame, text="-", command= lambda: self.__DecButtonUpdate(SPN, buttonFrame, PGU), font= modFont)
-			decButton.grid(row=1, column=1, sticky="ew")
-			
-			incButton= tk.Button(buttonFrame, text="+", command= lambda: self.__IncButtonUpdate(SPN, buttonFrame, PGU), font= modFont)
-			incButton.grid(row=1, column=2, sticky="ew")
+		if con.StrIsFloat(newEntry) and float(newEntry) >= SPN["loLimit"] and float(newEntry) <= SPN["hiLimit"]:
+			SPN["UI_Objects"]["currentVal"] = float(newEntry)				
+			if SPN["resolution"] < 1:
+				newEntry = round(float(newEntry), 2)										
+			newEntry = str(newEntry)  + ' ' + SPN["unit"]
+			SPN["UI_Objects"]["dispValLbl"].config(text=newEntry)
+			self.__SPNUpdateMsg(PGU, SPN, SPN["UI_Objects"]["currentVal"])
+			SPN["UI_Objects"]["entry"].delete(0, 'end')
+		else:
+			SPN["UI_Objects"]["entry"].config(foreground='red')
 
 
 	'''
@@ -178,46 +210,35 @@ class simulatorWindow:
 		
 		buttonFrame = ttk.Frame(self.mainFrame, padding=(5,5))
 		buttonFrame.pack()
-		
-		startButton= tk.Button(buttonFrame, text="START", command= self.__StartSimMsg, font= buttonFrame)
-		startButton.grid(row=1, column=1, sticky="ew")
-		
-		stopButton= tk.Button(buttonFrame, text="STOP", command= self.__StopSimMsg, font= buttonFrame)
-		stopButton.grid(row=1, column=2, sticky="ew")
 
+		startStopBtn = tk.Button(buttonFrame, text="START", command= lambda: self.__StartSim(startStopBtn), font= buttonFrame, activebackground= 'green', background= 'green', width= 5)
+		startStopBtn.grid(row=1, column=1, sticky="ew")
+		
 
 	'''
-	    Name:   IncButtonUpdate
-	    Desc:   Increments and updates the current value of the SPN 
-	    Param:  SPN - dictonary object contians PGU data, 
-	    		buttonFrame- tkinter frame to contain Sinc/dec btns, 
-	    		PGU - dictonary object contians PGU data
+	    Name: StartSim  
+	    Desc: 
+	    Param:  None
 	    Return: None
 	'''
-	def __IncButtonUpdate(self, SPN, buttonFrame, PGU):
-		temp = SPN["UI_Objects"]["currentVal"] + 1
-		if temp <= SPN["hiLimit"]:
-			dispVal = self.__updateDispVal(SPN, temp)
-			SPN["UI_Objects"]["dispValLbl"].config(text=dispVal)
-			SPN["UI_Objects"]["currentVal"] = temp
-			self.__SPNUpdateMsg(PGU, SPN, temp)
+	def __StartSim(self, startStopBtn):
+		startStopBtn.config(text= "STOP")
+		startStopBtn.config(background= 'red', activebackground= 'red')
+		startStopBtn.config(command= lambda: self.__StopSim(startStopBtn))
+		self.__StartSimMsg
 
 
 	'''
-	    Name:   decButtonUpdate
-	    Desc:   decrements and updates the current value of the SPN 
-	    Param:  SPN - dictonary object contians PGU data, 
-	    		buttonFrame- tkinter frame to contain Sinc/dec btns, 
-	    		PGU - dictonary object contians PGU data
+	    Name: StartSim  
+	    Desc: 
+	    Param:  None
 	    Return: None
 	'''
-	def __DecButtonUpdate(self, SPN, buttonFrame, PGU):
-		temp = SPN["UI_Objects"]["currentVal"] - 1
-		if temp >= SPN["loLimit"]:
-			dispVal = self.__updateDispVal(SPN, temp)
-			SPN["UI_Objects"]["dispValLbl"].config(text=dispVal)
-			SPN["UI_Objects"]["currentVal"] = temp
-			self.__SPNUpdateMsg(PGU, SPN, temp)
+	def __StopSim(self, startStopBtn):
+		startStopBtn.config(text= "START")
+		startStopBtn.config(background= 'green', activebackground= 'green')
+		startStopBtn.config(command= lambda: self.__StartSim(startStopBtn))
+		self.__StopSimMsg
 
 
 	'''
@@ -291,9 +312,9 @@ class simulatorWindow:
 				filteredDict[k] = v
 		
 		if currentVal == None:
-			filteredDict["currentVal"] = SPN["initialValue"]
+			filteredDict["currentVal"] = con.MetricToRaw(float(SPN["initialValue"]), SPN["resolution"], SPN["offset"])
 		else:	
-			filteredDict["currentVal"] = currentVal 
+			filteredDict["currentVal"] = con.MetricToRaw(float(currentVal), SPN["resolution"], SPN["offset"]) 
 			
 		return {"SPN": filteredDict}
 
