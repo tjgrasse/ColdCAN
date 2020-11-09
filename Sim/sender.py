@@ -4,7 +4,6 @@ from conversion import MillisecondsToSeconds
 import logging as log
 import can
 import time
-import threading # not sure about this one
 
 # Global Variables
 SendingPgns = dict()
@@ -202,13 +201,11 @@ def ReceivePgn(payload=None):
     Return: none
 '''
 def SenderMain():
+    global bus
     log.debug("Entered")
     # Initialize the sender
     InitializeSender()
 
     # Here is the main loop for the sender layer, this will not exit
     while True:
-        # Don't need anything in the main loop, just need the thread to stay up, using pass here.
-        # found this in the python documentation for just this purpose.
-        # https://docs.python.org/3.3/tutorial/controlflow.html#pass-statements
         pass

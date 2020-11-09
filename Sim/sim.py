@@ -12,7 +12,7 @@ import uiBuilder as UI
 import logging as log
 
 # Logging file and logging format
-FILENAME = "debug.log"
+FILENAME = "_sim-debug.log"
 FORMAT = "%(filename)s:%(funcName)s - %(message)s"
 
 if __name__ == "__main__":

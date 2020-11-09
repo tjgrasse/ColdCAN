@@ -3,7 +3,7 @@
 ## Purpose
 The purpose of the document is to provide details on the names and payloads that will be sent using the pub/sub communications mechanism.  Below is a list of the topics with their corresponding details.
 
-## Topics
+## Sender Topics
 
 ### BusStatus
 The `BusStatus` topic will be sent from the builder layer down to the sender layer to change the status of the bus.  This will enable or disable (start or stop) the software from transmitting.
@@ -64,7 +64,6 @@ The `SPNValueUpdate` topic will be sent from the UI layer down to the builder la
 ```
 A dictionary must be created of the values and then passed into `payload=` when sending.
 
-
 ### initSim
 The `initSim` topic will be sent from the UI layer down to the builder layer to initialize simulator.
 
@@ -114,5 +113,21 @@ SPN Format:
     }
 
 
+```
+A dictionary must be created of the values and then passed into `payload=` when sending.
+
+## Receiver Topics
+
+### ReceiverConfig
+The `ReceiverConfig` topic will be sent from the UI layer down to the receiver layer to setup what the receiver application will complete.  This will enable or disable (start or stop) the software from transmitting, start recording the values to a log if needed, and ...
+
+```
+{
+    "status": string,    // "start" and "stop" are valid options.
+    
+    "logging": bool,     // True records files false does not record 
+
+    "loggingFileName": string, // String containing the filename that the log will be saved in, it will only be used if logging is true, use "" if none
+}
 ```
 A dictionary must be created of the values and then passed into `payload=` when sending.
