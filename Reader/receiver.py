@@ -20,7 +20,7 @@ def ProcessMessage(message):
     global Printer
 
     if ActiveLogging:
-        Logger.on_message_received(message)
+        Logger.log_event(message)
 
     # Temporarily write to the terminal
     Printer.on_message_received(message)
@@ -56,19 +56,19 @@ def ShutdownTheBus():
 def CheckLogging(logging, filename):
     global ActiveLogging
     global Logger
-    global Printer
 
     if logging == True and ActiveLogging == False:
         if filename != None:
             loggerFile = filename + ".asc"
             log.debug("Logging CAN traffic in file %s", loggerFile)
             Logger = can.ASCWriter(loggerFile)
-            Printer = can.Printer()
+            ActiveLogging = True
         else:
             log.error("Invalid filename for the logger, logging not activated")
     else:
         if ActiveLogging == True:
             Logger.stop()
+            ActiveLogging = False
             log.debug("Stopping the logging and saving the file")
         else:
             log.debug("Not logging, it is disabled")
@@ -85,6 +85,7 @@ def RecvConfig(payload=None):
     log.debug("%s", payload)
 
     global ActiveBus
+    global Printer
 
     status = payload["status"]
     logging = payload["logging"]
@@ -98,6 +99,7 @@ def RecvConfig(payload=None):
             log.debug("Setting ActiveBus to True")
             ActiveBus = True
             CheckLogging(logging, filename)
+            Printer = can.Printer()
     elif status == "stop":
         if ActiveBus == True:
             # If status is stop and the bus is current enabled, then disable it

@@ -127,7 +127,7 @@ def InitializeSender():
     # Details on how to subscribe and use a lisener was obtained from the pub/sub documentation
     # https://pypubsub.readthedocs.io/en/v4.0.3/usage/usage_basic.html
     pub.subscribe(ReceivePgn, 'PgnUpdater')
-    pub.subscribe(BusHandling, "BusStatus")
+    pub.subscribe(BusHandling, 'BusStatus')
 
 # Listener Functions working with Pub/Sub
 '''
