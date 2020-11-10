@@ -7,6 +7,7 @@ import pprint
 import configVerif as cv
 import conversion as con
 
+
 class simulatorWindow:
 	
 	def __init__(self, parent, configDict):
@@ -41,6 +42,7 @@ class simulatorWindow:
 			self.__SimTitle()
 			self.__BuildPGURows()
 			self.__BuildStopStart()
+
 		else:
 			titleFont = tkFont.Font(family="Helvetica",size=18,weight="bold")
 			self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
@@ -225,7 +227,7 @@ class simulatorWindow:
 		startStopBtn.config(text= "STOP")
 		startStopBtn.config(background= 'red', activebackground= 'red')
 		startStopBtn.config(command= lambda: self.__StopSim(startStopBtn))
-		self.__StartSimMsg
+		self.__StartSimMsg()
 
 
 	'''
@@ -238,7 +240,7 @@ class simulatorWindow:
 		startStopBtn.config(text= "START")
 		startStopBtn.config(background= 'green', activebackground= 'green')
 		startStopBtn.config(command= lambda: self.__StartSim(startStopBtn))
-		self.__StopSimMsg
+		self.__StopSimMsg()
 
 
 	'''
@@ -250,7 +252,7 @@ class simulatorWindow:
 	def __StartSimMsg(self):
 		message = dict(status="start")
 		pub.sendMessage('BusStatus', payload=message)
-
+	
 
 	'''
 	    Name: 	StopSim
