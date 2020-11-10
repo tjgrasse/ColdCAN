@@ -288,9 +288,6 @@ def BuilderMain():
     log.debug("Entered")
     InitializeBuilder()
 
-    message = dict(status="start")
-    pub.sendMessage('BusStatus', payload=message)
-
     # Here is the main loop for the sender layer, this will not exit
     while True:
         # Don't need anything in the main loop, just need the thread to stay up, using pass here.
