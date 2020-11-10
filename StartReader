@@ -1,0 +1,3 @@
+#!/bin/bash
+cd ~/OSU/Classes/CS_467/ColdCAN/Reader
+python3 read.py
