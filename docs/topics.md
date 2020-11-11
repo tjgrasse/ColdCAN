@@ -131,3 +131,38 @@ The `ReceiverConfig` topic will be sent from the UI layer down to the receiver l
 }
 ```
 A dictionary must be created of the values and then passed into `payload=` when sending.
+
+### UpdateValue
+The `UpdateValue` topic will be sent from the extractor layer to the ui layer when a value that is being looked for has been updated
+
+```
+{
+    "PGN": {
+        "id": int,          // Integer ID of the PGN to be updated.
+    }
+    "SPNArry": [{
+        "id": int,          // Integer ID of the SPN to be updated.
+
+        "currentVal": int,	// New value of the SPN (raw already converted).
+    }]
+}
+```
+A dictionary must be created of the values and then passed into `payload=` when sending.
+
+### PgnWatch
+The `PgnWatch` topic will be sent from the extractor layer to the receiver layer to inform the layer of a new PGN to monitor when it is received.
+```
+{
+    "id": int,          // Arbitration ID that will be monitored.  This includes the priority, DP, PGN, and SA
+}
+```
+
+### PgnUpdate
+The `PgnUpdate` topic will be sent from the receiver layer to the extractor layer when a PGN that has been monitored has been received.
+```
+{
+    "id": int,              // Arbitration ID that has been received.  This includes the priority, DP, PGN, and SA
+
+    "payload": bytearray    // 8 bytes of data recevied within the message held within a bytearray
+}
+```

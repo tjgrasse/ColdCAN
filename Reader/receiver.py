@@ -1,29 +1,20 @@
 # Import the necessary libraries
 from pubsub import pub
 import logging as log
+import config
 import can
 import time
 
 # Global Variables
 MonitoringPgns = dict()
-bus = None
-ActiveBus = False
-# Logging Values
-ActiveLogging = False
-Logger = None
-# Printing Values
-Printer = None
 
 def ProcessMessage(message):
-    global Logger
-    global ActiveLogging
-    global Printer
 
-    if ActiveLogging:
-        Logger.log_event(message)
+    if config.ActiveLogging:
+        config.Logger.log_event(message)
 
     # Temporarily write to the terminal
-    Printer.on_message_received(message)
+    config.Printer.on_message_received(message)
 
 # Functions that invoke the can library
 '''
@@ -36,8 +27,7 @@ def SetupTheBus():
     # Information on how to send data periodically is located in the socketcan documentation
     # https://python-can.readthedocs.io/en/master/interfaces/socketcan.html#can.interfaces.socketcan.SocketcanBus
     log.info("Starting the bus")
-    global bus
-    bus = can.interfaces.socketcan.SocketcanBus(channel='vcan0')
+    config.bus = can.interfaces.socketcan.SocketcanBus(channel='vcan0')
 
 '''
     Name:   ShutdownTheBus
@@ -49,26 +39,23 @@ def ShutdownTheBus():
     # Information on how to send data periodically is located in the socketcan documentation
     # https://python-can.readthedocs.io/en/master/interfaces/socketcan.html#can.interfaces.socketcan.SocketcanBus.shutdown
     log.info("Killing all Periodic Tasks")
-    global bus
-    bus.shutdown()
+    config.bus.shutdown()
     MonitoringPgns.clear()
 
 def CheckLogging(logging, filename):
-    global ActiveLogging
-    global Logger
 
-    if logging == True and ActiveLogging == False:
+    if logging == True and config.ActiveLogging == False:
         if filename != None:
             loggerFile = filename + ".asc"
             log.debug("Logging CAN traffic in file %s", loggerFile)
-            Logger = can.ASCWriter(loggerFile)
-            ActiveLogging = True
+            config.Logger = can.ASCWriter(loggerFile)
+            config.ActiveLogging = True
         else:
             log.error("Invalid filename for the logger, logging not activated")
     else:
-        if ActiveLogging == True:
-            Logger.stop()
-            ActiveLogging = False
+        if config.ActiveLogging == True:
+            config.Logger.stop()
+            config.ActiveLogging = False
             log.debug("Stopping the logging and saving the file")
         else:
             log.debug("Not logging, it is disabled")
@@ -84,28 +71,25 @@ def CheckLogging(logging, filename):
 def RecvConfig(payload=None):
     log.debug("%s", payload)
 
-    global ActiveBus
-    global Printer
-
     status = payload["status"]
     logging = payload["logging"]
     filename = payload["loggingFileName"]
     
     # Get the status value and intrepret it
     if status == "start":
-        if ActiveBus == False:
+        if config.ActiveBus == False:
             # If status is start and the bus is currently not on then enable it
             SetupTheBus()
             log.debug("Setting ActiveBus to True")
-            ActiveBus = True
+            config.ActiveBus = True
             CheckLogging(logging, filename)
-            Printer = can.Printer()
+            config.Printer = can.Printer()
     elif status == "stop":
-        if ActiveBus == True:
+        if config.ActiveBus == True:
             # If status is stop and the bus is current enabled, then disable it
             ShutdownTheBus()
             log.debug("Setting ActiveBus to False")
-            ActiveBus = False
+            config.ActiveBus = False
             CheckLogging(False, None)
     else:
         log.error("Invalid string for status=%s", status)
@@ -131,15 +115,15 @@ def InitializeReceiver():
 '''
 def RecvMain():
     log.debug("Entered")
-    global Logger
+
     # Initialize the sender
     InitializeReceiver()
 
     # Here is the main loop for the sender layer, this will not exit
     while True:
-        if ActiveBus == True:
+        if config.ActiveBus == True:
             # Start receiving content here
-            message = bus.recv(None)
+            message = config.bus.recv(None)
             # If we have a good message lets process it
             if message != None:
                 ProcessMessage(message)
