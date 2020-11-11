@@ -2,13 +2,12 @@
 from pubsub import pub
 from conversion import MillisecondsToSeconds
 import logging as log
+import config
 import can
 import time
 
 # Global Variables
 SendingPgns = dict()
-bus = None
-ActiveBus = False
 ReceiverInitialized = False
 
 # Dictionary Functions for adding, removing, and finding
@@ -60,8 +59,7 @@ def SetupTheBus():
     # Information on how to send data periodically is located in the socketcan documentation
     # https://python-can.readthedocs.io/en/master/interfaces/socketcan.html#can.interfaces.socketcan.SocketcanBus
     log.info("Starting the bus")
-    global bus
-    bus = can.interfaces.socketcan.SocketcanBus(channel='vcan0')
+    config.bus = can.interfaces.socketcan.SocketcanBus(channel='vcan0')
 
 '''
     Name:   ShutdownTheBus
@@ -73,8 +71,7 @@ def ShutdownTheBus():
     # Information on how to send data periodically is located in the socketcan documentation
     # https://python-can.readthedocs.io/en/master/interfaces/socketcan.html#can.interfaces.socketcan.SocketcanBus.shutdown
     log.info("Killing all Periodic Tasks")
-    global bus
-    bus.shutdown()
+    config.bus.shutdown()
     SendingPgns.clear()
 
 '''
@@ -89,7 +86,7 @@ def CreateNewPeriodic(pgn, message, rate):
     # Information on how to send data periodically is located in the socketcan documentation
     # https://python-can.readthedocs.io/en/master/bus.html#can.BusABC.send_periodic
     period = MillisecondsToSeconds(rate)
-    instance = bus.send_periodic(message, period)
+    instance = config.bus.send_periodic(message, period)
     AddUpdatePgn(str(pgn), instance)
 
 '''
@@ -140,22 +137,21 @@ def InitializeSender():
 def BusHandling(payload=None):
     log.debug("%s", payload)
 
-    global ActiveBus
     status = payload["status"]
     
     # Get the status value and intrepret it
     if status == "start":
-        if ActiveBus == False:
+        if config.ActiveBus == False:
             # If status is start and the bus is currently not on then enable it
             SetupTheBus()
             log.debug("Setting ActiveBus to True")
-            ActiveBus = True
+            config.ActiveBus = True
     elif status == "stop":
-        if ActiveBus == True:
+        if config.ActiveBus == True:
             # If status is stop and the bus is current enabled, then disable it
             ShutdownTheBus()
             log.debug("Setting ActiveBus to False")
-            ActiveBus = False
+            config.ActiveBus = False
     else:
         log.error("Invalid string for status=%s", status)
 
@@ -171,7 +167,7 @@ def ReceivePgn(payload=None):
     log.debug("%s", payload)
 
     # Only put onto the bus if there is an ActiveBus going on
-    if ActiveBus:
+    if config.ActiveBus:
         # Get the payload information
         pgn = payload["pgn"]
         rate = payload["rate"]
@@ -201,7 +197,6 @@ def ReceivePgn(payload=None):
     Return: none
 '''
 def SenderMain():
-    global bus
     log.debug("Entered")
     # Initialize the sender
     InitializeSender()
