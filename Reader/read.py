@@ -1,6 +1,7 @@
 # Import the necessary libraries
 from vcan import SetupVirtualCanInterface
 from receiver import RecvMain
+from extractor import ExtrMain
 from test import TestMain, StartBus
 
 import threading
@@ -22,13 +23,15 @@ if __name__ == "__main__":
     if SetupVirtualCanInterface() == 0:
         log.info("vcan is up and running for simulator")
         
-        # Uncomment these two lines to use the test.py file to run tests on the program
         receiver = threading.Thread(target=RecvMain, daemon=True)
         receiver.start()
 
+        extractor = threading.Thread(target=ExtrMain, daemon=True)
+        extractor.start()
+
         # Test function that will start the bus without a UI
-        #tester = threading.Thread(target=TestMain, daemon=True)
-        #tester.start()
+        tester = threading.Thread(target=TestMain, daemon=True)
+        tester.start()
 
         # If not using the tester have this open
         StartBus()

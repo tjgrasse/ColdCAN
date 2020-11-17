@@ -6,15 +6,51 @@ import can
 import time
 
 # Global Variables
-MonitoringPgns = dict()
+MonitoringPgns = []
 
+'''
+    Name:   UpdateValue
+    Desc:   Checks if the value is in the MonitoringPgns list
+    Param:  arbitrationId - arbitrationId that would match a corresponding value in the list
+    Return: True if arbitrationId is in the list, False if it is not
+'''
+def UpdateValue(arbitrationId):
+    if arbitrationId in MonitoringPgns:
+        return True
+    else:
+        return False
+
+'''
+    Name:   GetArbitrationId
+    Desc:   Obtains the shortened arbitration id from the CAN arbitration ID
+    Param:  header - the CAN arbitration ID passed in
+    Return: int, the first three bytes of the arbitration ID
+'''
+def GetArbitrationId(header):
+    return (header & 0xFFFFFF)
+
+'''
+    Name:   ProcessMessage
+    Desc:   Processes a can message received from the bus
+    Param:  message - entire message received from the bus
+    Return: none
+'''
 def ProcessMessage(message):
-
+    # Log to file if needed
     if config.ActiveLogging:
         config.Logger.log_event(message)
 
-    # Temporarily write to the terminal
-    config.Printer.on_message_received(message)
+    # Get the arbitration id value
+    arbitrationId = GetArbitrationId(message.arbitration_id)
+
+    # Check if the arbitration id is in the list
+    if UpdateValue(arbitrationId):
+        # Temporarily print out the values onto the console
+        #config.Printer.on_message_received(message)
+
+        # Pass payload up to the extractor layer to get out the data that is needed
+        message = dict(arbitrationId=message.arbitration_id, payload=message.data)
+        pub.sendMessage('ValueUpdate', payload=message)
 
 # Functions that invoke the can library
 '''
@@ -94,6 +130,26 @@ def RecvConfig(payload=None):
     else:
         log.error("Invalid string for status=%s", status)
 
+'''
+    Name:   AddNewWatchPgn
+    Desc:   Callback function when subscribing to PgnWatch.  Informs receiver.py of a new arbitration id that needs
+            to be monitored.
+    Param:  payload - BusStatus object, located in the topics.md document
+    Return: none
+'''
+def AddNewWatchPgn(payload=None):
+    # Grab the arbitration id passed down
+    arbitrationId = payload["arbitrationId"]
+
+    # Make sure the value is not None
+    if arbitrationId != None:
+        if arbitrationId in MonitoringPgns:
+            # If its in the list do nothing
+            log.info("Not adding %d, the id is already being monitored", arbitrationId)
+        else:
+            # If its not in the list append it to the list
+            MonitoringPgns.append(arbitrationId)
+            log.info("Adding new Arbitration ID to monitor: %d", arbitrationId)
 
 # Subscribing Functions
 '''
@@ -106,6 +162,7 @@ def InitializeReceiver():
     # Details on how to subscribe and use a lisener was obtained from the pub/sub documentation
     # https://pypubsub.readthedocs.io/en/v4.0.3/usage/usage_basic.html
     pub.subscribe(RecvConfig, "ReceiverConfig")
+    pub.subscribe(AddNewWatchPgn, "PgnWatch")
 
 '''
     Name:   RecvMain
@@ -118,6 +175,8 @@ def RecvMain():
 
     # Initialize the sender
     InitializeReceiver()
+    message = dict(arbitrationId=419348785)
+    pub.sendMessage('PgnWatch', payload=message)
 
     # Here is the main loop for the sender layer, this will not exit
     while True:
