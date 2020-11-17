@@ -1,0 +1,165 @@
+{
+    "simDetails":{
+        "title":"Standard Values",
+        "description":"Blah Blah Blah",
+        "author":"Brian Terrell",
+        "email":"terrelbr@oregonstate.edu"
+    },
+    "PGUDict":{
+        "65217":{
+            "Label":"HR Vehicle Distance",
+            "simVisible":true,
+            "sa":49,
+            "id":65217,
+            "SPNDict":{
+                "917":{
+                    "Label":"HR Total Vehicle Distance",
+                    "simVisible":true,
+                    "dataLngth":32,
+                    "resolution":5,
+                    "offset":0,
+                    "startBit":0,
+                    "unit":"m",
+                    "id":917
+                },
+                "918":{
+                    "Label":"HR Trip Distance",
+                    "simVisible":true,
+                    "dataLngth":32,
+                    "resolution":5,
+                    "offset":0,
+                    "startBit":32,
+                    "unit":"m",
+                    "id":918
+                }
+            }
+        },
+        "65265":{
+            "Label":"Cruise Control Vehicle Speed",
+            "simVisible":true,
+            "sa":23,
+            "id":65265,
+            "SPNDict":{
+                "69":{
+                    "Label":"Two Speed Axle Switch",
+                    "simVisible":true,
+                    "dataLngth":2,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":0,
+                    "unit":"",
+                    "id":69
+                },
+                "70":{
+                    "Label":"Parking Brake Switch",
+                    "simVisible":true,
+                    "dataLngth":2,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":2,
+                    "initialValue":0,
+                    "unit":"",
+                    "id":70
+                },
+                "1633":{
+                    "Label":"CC Pause Switch",
+                    "simVisible":true,
+                    "dataLngth":2,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":4,
+                    "unit":"",
+                    "id":1633
+                },
+                "595":{
+                    "Label":"Cruise Control Active",
+                    "simVisible":true,
+                    "dataLngth":2,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":24,
+                    "unit":"",
+                    "id":595
+                },
+                "596":{
+                    "Label":"CC Enable Switch",
+                    "simVisible":true,
+                    "dataLngth":2,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":26,
+                    "unit":"",
+                    "id":70
+                },
+                "597":{
+                    "Label":"Brake Switch",
+                    "simVisible":true,
+                    "dataLngth":2,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":28,
+                    "unit":"",
+                    "id":597
+                },
+                "598":{
+                    "Label":"Clutch Switch",
+                    "simVisible":true,
+                    "dataLngth":2,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":30,
+                    "unit":"",
+                    "id":598
+                }
+            }
+        },
+        "65274":{
+            "Label":"Cruise Control Vehicle Speed",
+            "simVisible":true,
+            "sa":3,
+            "id":65274,
+            "SPNDict":{
+                "116":{
+                    "Label":"Brake Application Pressure",
+                    "simVisible":true,
+                    "dataLngth":8,
+                    "resolution":4,
+                    "offset":0,
+                    "startBit":0,
+                    "unit":"kPa",
+                    "id":116
+                },
+                "117":{
+                    "Label":"Brake Primary Pressure",
+                    "simVisible":true,
+                    "dataLngth":8,
+                    "resolution":4,
+                    "offset":0,
+                    "startBit":8,
+                    "unit":"kPa",
+                    "id":117
+                },
+                "118":{
+                    "Label":"Brake Secondary Pressure",
+                    "simVisible":true,
+                    "dataLngth":8,
+                    "resolution":4,
+                    "offset":0,
+                    "startBit":16,
+                    "unit":"kPa",
+                    "id":118
+                },
+                "619":{
+                    "Label":"Parking Brake Actuator",
+                    "simVisible":true,
+                    "dataLngth":2,
+                    "resolution":1,
+                    "offset":0,
+                    "startBit":24,
+                    "unit":"",
+                    "id":619
+                }
+            }
+        }
+    }
+}
