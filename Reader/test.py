@@ -29,23 +29,25 @@ def ConfigBusTesting():
     else:
         ConfigBus("start", True, None)
 
-def ConfigExtractor(payload):
-    log.debug("%s", payload)
-    pub.sendMessage('InitRead', payload=payload)
+# Temp command to sent updates to UI
+def UpdateValue(PGN, SPN, value):
+    log.debug("PGN=%d SPN=%d Value=%d", PGN, SPN, value)
+    message = dict(PGN=dict(id=PGN), SPNArry=[dict(id=SPN, currentVal=value)])
+    #print(message)
+    pub.sendMessage('UpdateValue', payload=message)
 
-def ExtractorTesting():
+
+def UpdateValueTesting():
     value = input("What command do you want to test? ")
     if value == "1":
-        array = []
-        array.append(HR_DIST)
-        ConfigExtractor(array)
-    else:
-        log.info("Unknown Command")
+        UpdateValue(65265, 69, 1)
+    if value == "2":
+        UpdateValue(65265, 69, 0)
 
 def TestMain():
     # Below are tests that are in the main loop, only one should be active at a time, the rest should be commented out.
     while True:
         # ReceiverConfig command testing
         #ConfigBusTesting()
-        # Incoming Value Testing
-        ExtractorTesting()
+        UpdateValueTesting()
+        
