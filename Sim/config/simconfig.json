@@ -145,7 +145,7 @@
                     "hiLimit":1,
                     "type":"measured",
                     "unit":"",
-                    "id":70
+                    "id": 596
                 },
                 "597":{
                     "Label":"Brake Switch",

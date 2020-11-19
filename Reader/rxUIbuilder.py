@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
 from pubsub import pub
-
+from pprint import pprint
 
 class simulatorWindow:
 	
@@ -69,9 +69,7 @@ class simulatorWindow:
 		lblFrmFont = tkFont.Font(family="Helvetica",size=10)
 		self.__initSimMsg(self.PGUDict)
 		for PGNKey in self.PGUDict.keys():
-			#print(PGNKey)
 			if self.PGUDict[PGNKey]["simVisible"] == True:
-				#print(self.PGUDict[PGNKey]["Label"])
 				PGUFrame = tk.LabelFrame(self.mainFrame, text= self.PGUDict[PGNKey]["Label"] + " - " + str(self.PGUDict[PGNKey]["id"]), font=lblFrmFont)
 				PGUFrame.pack()
 				self.__BuildSPNs(self.PGUDict[PGNKey], PGUFrame)
@@ -278,6 +276,7 @@ class simulatorWindow:
 	'''
 	def __initSimMsg(self, PGUDict):
 		message = self.__intDictComposer(PGUDict)
+		#pprint(message)
 		pub.sendMessage('InitRead', payload=message)
 
 
