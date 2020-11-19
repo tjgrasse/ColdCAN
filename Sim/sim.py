@@ -32,7 +32,7 @@ if __name__ == "__main__":
     # https://www.geeksforgeeks.org/iconphoto-method-in-tkinter-python/
     # The truck image was found at this site and is available for non-commercial use (we are educational)
     # https://www.hiclipart.com/free-transparent-background-png-clipart-dgeqn
-    image = tk.PhotoImage(file='images/truck.png')
+    image = tk.PhotoImage(file='images/truckT.png')
     root.iconphoto(False, image)
     
     if SetupVirtualCanInterface() == 0:
