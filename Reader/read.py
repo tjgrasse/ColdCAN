@@ -45,11 +45,11 @@ if __name__ == "__main__":
         extractor.start()
 
         # Test function that will start the bus without a UI
-        tester = threading.Thread(target=TestMain, daemon=True)
-        tester.start()
+        #tester = threading.Thread(target=TestMain, daemon=True)
+        #tester.start()
 
         # If not using the tester have this open
-        StartBus()
+        #StartBus()
 
         # Start the UI after the threads have been started
         sim = UI.simulatorWindow(root, fM.OpenConfigFile("simconfig.json"))
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         # Here starts the main loop
         while True:
             root.mainloop()  #This currently blocks the main loop unil the window is closed, the the test suite take over.
-            pass
+            break
 
     else:
         log.error("Unable to start vcan, exiting simulator")
