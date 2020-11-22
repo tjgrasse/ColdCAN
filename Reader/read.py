@@ -49,7 +49,8 @@ if __name__ == "__main__":
         StartBus()
 
         # Start the UI after the threads have been started
-        sim = UI.simulatorWindow(root, fM.OpenConfigFile("simconfig.json"))
+        #sim = UI.simulatorWindow(root, fM.OpenConfigFile("simconfig.json"))
+        sim = UI.simulatorWindow(root)
         sim.initMainSimWindow()
 
         # Here starts the main loop

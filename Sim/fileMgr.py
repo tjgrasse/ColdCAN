@@ -20,8 +20,7 @@ def FindConfigFiles():
     Param:  Name of file including extension
     Return: Returns dictonary object of config file 
 '''
-def OpenConfigFile(fileName):
-	filePath = "config/" + fileName
+def OpenConfigFile(filePath):
 	try:
 		fileObj = open(filePath, 'r')
 		configDict = json.loads(fileObj.read())
