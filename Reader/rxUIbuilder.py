@@ -7,6 +7,7 @@ from pprint import pprint
 from tkinter import filedialog 
 import os
 import configVerif as cv
+import decimal
 
 class simulatorWindow:
 	
@@ -385,4 +386,5 @@ class simulatorWindow:
 		PGN = payload["PGN"]["id"]
 		SPNDict = self.PGUDict[str(PGN)]["SPNDict"]
 		for SPN in payload['SPNArry']:
-			SPNDict[str(SPN['id'])]["UI_Objects"]["dispValLbl"].config(text=str(SPN["currentVal"]))
+			newVal = '{:f}'.format(decimal.Decimal(SPN["currentVal"]).normalize())
+			SPNDict[str(SPN['id'])]["UI_Objects"]["dispValLbl"].config(text=str(newVal))
