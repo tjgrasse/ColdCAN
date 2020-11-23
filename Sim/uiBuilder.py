@@ -8,6 +8,8 @@ import configVerif as cv
 import conversion as con
 from tkinter import filedialog 
 import os
+import decimal
+
 
 
 class simulatorWindow:
@@ -226,10 +228,10 @@ class simulatorWindow:
 		newEntry = SPN["UI_Objects"]["entry"].get()
 		
 		if con.StrIsFloat(newEntry) and float(newEntry) >= SPN["loLimit"] and float(newEntry) <= SPN["hiLimit"]:
-			SPN["UI_Objects"]["currentVal"] = float(newEntry)				
-			if SPN["resolution"] < 1:
-				newEntry = round(float(newEntry), 2)										
-			newEntry = str(newEntry)  + ' ' + SPN["unit"]
+			val = con.MetricToRawRnd(float(newEntry), SPN["resolution"], SPN["offset"])
+			val= con.RawToMetric(val, SPN["resolution"], SPN["offset"])
+			SPN["UI_Objects"]["currentVal"] = val										
+			newEntry = '{:f}'.format(decimal.Decimal(val).normalize())  + ' ' + SPN["unit"]
 			SPN["UI_Objects"]["dispValLbl"].config(text=newEntry)
 			self.__SPNUpdateMsg(PGU, SPN, SPN["UI_Objects"]["currentVal"])
 			SPN["UI_Objects"]["entry"].delete(0, 'end')
@@ -350,9 +352,9 @@ class simulatorWindow:
 				filteredDict[k] = v
 		
 		if currentVal == None:
-			filteredDict["currentVal"] = con.MetricToRaw(float(SPN["initialValue"]), SPN["resolution"], SPN["offset"])
+			filteredDict["currentVal"] = con.MetricToRawRnd(float(SPN["initialValue"]), SPN["resolution"], SPN["offset"])
 		else:	
-			filteredDict["currentVal"] = con.MetricToRaw(float(currentVal), SPN["resolution"], SPN["offset"]) 
+			filteredDict["currentVal"] = con.MetricToRawRnd(float(currentVal), SPN["resolution"], SPN["offset"]) 
 			
 		return {"SPN": filteredDict}
 

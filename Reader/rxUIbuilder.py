@@ -6,7 +6,7 @@ from pubsub import pub
 from pprint import pprint
 from tkinter import filedialog 
 import os
-
+import configVerif as cv
 
 class simulatorWindow:
 	
@@ -64,7 +64,6 @@ class simulatorWindow:
 			self.PGUDict = fM.get_PGUDict(self.configDict)
 			self.simDetails = fM.get_simDetails(self.configDict)
 			self.buttonFrame.destroy()
-			#self.__PopulateSim(mainFrame)
 			self.__ChooseLogging(mainFrame)
 
 	'''
@@ -125,18 +124,18 @@ class simulatorWindow:
 	    Return: None
 	'''
 	def __PopulateSim(self, mainFrame):
-		#if cv.verifPGN(fM.get_PGUDict(self.configDict)):
-		self.parent.bind_all("<1>", lambda event:event.widget.focus_set())
-		self.__SimTitle()
-		self.__BuildPGURows()
-		self.__BuildStopStart()
-		pub.subscribe(self.__UpdateValue, "UpdateValue")
+		if cv.verifPGN(fM.get_PGUDict(self.configDict)):
+			self.parent.bind_all("<1>", lambda event:event.widget.focus_set())
+			self.__SimTitle()
+			self.__BuildPGURows()
+			self.__BuildStopStart()
+			pub.subscribe(self.__UpdateValue, "UpdateValue")
 
-		#else:
-		#	titleFont = tkFont.Font(family="Helvetica",size=18,weight="bold")
-		#	self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
-		#	ttk.Label(self.titleFrame, text='Configuration file error, please check error log.', font = titleFont).pack(expand=1, fill=tk.X)
-		#	self.titleFrame.pack()
+		else:
+			titleFont = tkFont.Font(family="Helvetica",size=18,weight="bold")
+			self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
+			ttk.Label(self.titleFrame, text='Configuration file error, please check error log.', font = titleFont).pack(expand=1, fill=tk.X)
+			self.titleFrame.pack()
 
 	'''
 	    Name: 	SimTitle  
