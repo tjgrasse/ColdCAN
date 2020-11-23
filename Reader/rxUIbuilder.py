@@ -97,7 +97,7 @@ class simulatorWindow:
 	    Ref: 
 	'''
 	def __YesLogging(self, mainFrame, promptFrame):
-		logFileName = filedialog.asksaveasfilename(initialdir = os.getcwd(), title = "SAVE LOG AS", filetypes = [("Text File", "*.txt")])
+		logFileName = filedialog.asksaveasfilename(initialdir = os.getcwd(), title = "SAVE LOG AS", filetypes = [("ASC File", "*.asc")])
 		if logFileName:
 			self.isLogging = True
 			self.logPath = logFileName
