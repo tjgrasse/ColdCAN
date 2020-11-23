@@ -4,16 +4,21 @@ from tkinter import ttk
 import tkinter.font as tkFont
 from pubsub import pub
 from pprint import pprint
+from tkinter import filedialog 
+import os
+import configVerif as cv
 
 class simulatorWindow:
 	
-	def __init__(self, parent, configDict):
+	def __init__(self, parent):
 		self.parent = parent
-		self.configDict = configDict
-		self.PGUDict = fM.get_PGUDict(configDict)
-		self.simDetails = fM.get_simDetails(configDict)
+		self.configDict = None
+		self.PGUDict = None
+		self.simDetails = None
 		self.mainFrame = None
 		self.initData = None
+		self.isLogging = None
+		self.logPath = None
 
 	'''
     	Name:   initMainSimWindow
@@ -35,12 +40,102 @@ class simulatorWindow:
 		ttk.Label(self.titleFrame, text='J1939 Simulator Receiver', font = titleFont).pack(expand=1, fill=tk.X)
 		self.titleFrame.pack()
 		
-		self.__SimTitle()
-		self.__BuildPGURows()
-		self.__BuildStopStart()
-		pub.subscribe(self.__UpdateValue, "UpdateValue")
+
+		buttonFont = tkFont.Font(size=14,weight="bold")
+		self.buttonFrame = ttk.Frame(self.mainFrame, padding=(100,40))
+		self.configButton = tk.Button(self.buttonFrame, text = "Choose Configuration File", font = buttonFont, command= lambda: self.__BrowseConfig(self.mainFrame, self.configButton))
+		self.configButton.pack()
+		self.buttonFrame.pack()
 
 
+
+
+	'''
+	    Name: 	 
+	    Desc: 	 
+	    Param:  None
+	    Return: None
+	    Ref: https://www.geeksforgeeks.org/file-explorer-in-python-using-tkinter/
+	'''
+	def __BrowseConfig(self, mainFrame, configButton):
+		configFileName = filedialog.askopenfilename(initialdir = os.getcwd() + '/config', title = "Select a Configuration File", filetypes = [("JSON files", "*.json")])
+		if configFileName:
+			self.configDict = fM.OpenConfigFile(configFileName)
+			self.PGUDict = fM.get_PGUDict(self.configDict)
+			self.simDetails = fM.get_simDetails(self.configDict)
+			self.buttonFrame.destroy()
+			self.__ChooseLogging(mainFrame)
+
+	'''
+	    Name: 	 
+	    Desc: 	 
+	    Param:  None
+	    Return: None
+	    Ref: 
+	'''
+	def __ChooseLogging(self, mainFrame):
+		titleFont = tkFont.Font(family="Helvetica",size=14)
+		self.promptFrame = ttk.Frame(self.mainFrame, padding=(30,20))
+		ttk.Label(self.promptFrame, text='Would you like to store the results of this session?', font = titleFont).pack(expand=1, fill=tk.X)
+		
+		
+		buttonFont = tkFont.Font(size=14,weight="bold")
+		self.buttonFrame = ttk.Frame(self.promptFrame, padding=(0,10))
+		self.yesButton = tk.Button(self.buttonFrame, text = "Yes", font = buttonFont, command= lambda: self.__YesLogging(self.mainFrame, self.promptFrame))
+		self.yesButton.grid(row=1, column=1, sticky="ew", padx = 5)
+		self.noButton = tk.Button(self.buttonFrame, text = "No", font = buttonFont, command= lambda: self.__NoLogging(self.mainFrame, self.promptFrame))
+		self.noButton.grid(row=1, column=2, sticky="ew", padx = 5)
+
+		self.buttonFrame.pack()
+
+		self.promptFrame.pack()
+	'''
+	    Name: 	 
+	    Desc: 	 
+	    Param:  None
+	    Return: None
+	    Ref: 
+	'''
+	def __YesLogging(self, mainFrame, promptFrame):
+		logFileName = filedialog.asksaveasfilename(initialdir = os.getcwd(), title = "SAVE LOG AS", filetypes = [("Text File", "*.txt")])
+		if logFileName:
+			self.isLogging = True
+			self.logPath = logFileName
+			self.promptFrame.destroy()
+			self.__PopulateSim(mainFrame)
+
+	'''
+	    Name: 	 
+	    Desc: 	 
+	    Param:  None
+	    Return: None
+	    Ref: 
+	'''
+	def __NoLogging(self, mainFrame, promptFrame):
+			self.isLogging = False
+			self.logPath = ""
+			self.promptFrame.destroy()
+			self.__PopulateSim(mainFrame)
+
+	'''
+	    Name: 	 
+	    Desc: 	 
+	    Param:  None
+	    Return: None
+	'''
+	def __PopulateSim(self, mainFrame):
+		if cv.verifPGN(fM.get_PGUDict(self.configDict)):
+			self.parent.bind_all("<1>", lambda event:event.widget.focus_set())
+			self.__SimTitle()
+			self.__BuildPGURows()
+			self.__BuildStopStart()
+			pub.subscribe(self.__UpdateValue, "UpdateValue")
+
+		else:
+			titleFont = tkFont.Font(family="Helvetica",size=18,weight="bold")
+			self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
+			ttk.Label(self.titleFrame, text='Configuration file error, please check error log.', font = titleFont).pack(expand=1, fill=tk.X)
+			self.titleFrame.pack()
 
 	'''
 	    Name: 	SimTitle  
@@ -182,7 +277,7 @@ class simulatorWindow:
 	    Return: None
 	'''
 	def __StartSimMsg(self):
-		message = dict([("status", "start"), ("logging", False), ("loggingFileName","")])
+		message = dict([("status", "start"), ("logging", self.isLogging), ("loggingFileName",self.logPath)])
 		pub.sendMessage('ReceiverConfig', payload=message)
 	
 

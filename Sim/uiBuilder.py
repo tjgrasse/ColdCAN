@@ -6,15 +6,19 @@ from pubsub import pub
 import pprint
 import configVerif as cv
 import conversion as con
+from tkinter import filedialog 
+import os
+import decimal
+
 
 
 class simulatorWindow:
 	
-	def __init__(self, parent, configDict):
+	def __init__(self, parent):
 		self.parent = parent
-		self.configDict = configDict
-		self.PGUDict = fM.get_PGUDict(configDict)
-		self.simDetails = fM.get_simDetails(configDict)
+		self.configDict = None
+		self.PGUDict = None
+		self.simDetails = None
 		self.mainFrame = None
 		self.initData = None
 
@@ -32,12 +36,46 @@ class simulatorWindow:
 		
 		self.mainFrame = ttk.Frame(self.parent, padding=(10,10))
 		self.mainFrame.pack()
+
+		titleFont = tkFont.Font(family="Helvetica",size=36,weight="bold")
+		self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
+		ttk.Label(self.titleFrame, text='J1939 Simulator Sender', font = titleFont).pack(expand=1, fill=tk.X)
+		self.titleFrame.pack()
 		
+		buttonFont = tkFont.Font(size=14,weight="bold")
+		self.buttonFrame = ttk.Frame(self.mainFrame, padding=(100,40))
+		self.configButton = tk.Button(self.buttonFrame, text = "Choose Configuration File", font = buttonFont, command= lambda: self.__BrowseConfig(self.mainFrame, self.configButton))
+		self.configButton.pack()
+		self.buttonFrame.pack()
+
+
+		
+	'''
+	    Name: 	 
+	    Desc: 	 
+	    Param:  None
+	    Return: None
+	    Ref: https://www.geeksforgeeks.org/file-explorer-in-python-using-tkinter/
+	'''
+	def __BrowseConfig(self, mainFrame, configButton):
+		configFileName = filedialog.askopenfilename(initialdir = os.getcwd() + '/config', title = "Select a Configuration File", filetypes = [("JSON files", "*.json")])
+		if configFileName:
+			self.configDict = fM.OpenConfigFile(configFileName)
+			self.PGUDict = fM.get_PGUDict(self.configDict)
+			self.simDetails = fM.get_simDetails(self.configDict)
+			self.buttonFrame.destroy()
+			self.__PopulateSim(mainFrame)
+
+
+
+	'''
+	    Name: 	 
+	    Desc: 	 
+	    Param:  None
+	    Return: None
+	'''
+	def __PopulateSim(self, mainFrame):
 		if cv.verifPGN(fM.get_PGUDict(self.configDict)):
-			titleFont = tkFont.Font(family="Helvetica",size=36,weight="bold")
-			self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
-			ttk.Label(self.titleFrame, text='J1939 Simulator Sender', font = titleFont).pack(expand=1, fill=tk.X)
-			self.titleFrame.pack()
 			self.parent.bind_all("<1>", lambda event:event.widget.focus_set())
 			self.__SimTitle()
 			self.__BuildPGURows()
@@ -48,7 +86,7 @@ class simulatorWindow:
 			self.titleFrame = ttk.Frame(self.mainFrame, padding=(30,0))
 			ttk.Label(self.titleFrame, text='Configuration file error, please check error log.', font = titleFont).pack(expand=1, fill=tk.X)
 			self.titleFrame.pack()
-		
+
 
 
 	'''
@@ -190,10 +228,10 @@ class simulatorWindow:
 		newEntry = SPN["UI_Objects"]["entry"].get()
 		
 		if con.StrIsFloat(newEntry) and float(newEntry) >= SPN["loLimit"] and float(newEntry) <= SPN["hiLimit"]:
-			SPN["UI_Objects"]["currentVal"] = float(newEntry)				
-			if SPN["resolution"] < 1:
-				newEntry = round(float(newEntry), 2)										
-			newEntry = str(newEntry)  + ' ' + SPN["unit"]
+			val = con.MetricToRawRnd(float(newEntry), SPN["resolution"], SPN["offset"])
+			val= con.RawToMetric(val, SPN["resolution"], SPN["offset"])
+			SPN["UI_Objects"]["currentVal"] = val										
+			newEntry = '{:f}'.format(decimal.Decimal(val).normalize())  + ' ' + SPN["unit"]
 			SPN["UI_Objects"]["dispValLbl"].config(text=newEntry)
 			self.__SPNUpdateMsg(PGU, SPN, SPN["UI_Objects"]["currentVal"])
 			SPN["UI_Objects"]["entry"].delete(0, 'end')
@@ -208,12 +246,12 @@ class simulatorWindow:
 	    Return: None
 	'''
 	def __BuildStopStart(self):
-		startstopFont = tkFont.Font(family="Helvetica",size=14,weight="bold")
+		startstopFont = tkFont.Font(size=14,weight="bold")
 		
 		buttonFrame = ttk.Frame(self.mainFrame, padding=(5,5))
 		buttonFrame.pack()
 
-		startStopBtn = tk.Button(buttonFrame, text="START", command= lambda: self.__StartSim(startStopBtn), font= buttonFrame, activebackground= 'green', background= 'green', width= 5)
+		startStopBtn = tk.Button(buttonFrame, text="START", command= lambda: self.__StartSim(startStopBtn), font= startstopFont, activebackground= 'green', background= 'green', width= 5)
 		startStopBtn.grid(row=1, column=1, sticky="ew")
 		
 
@@ -314,9 +352,9 @@ class simulatorWindow:
 				filteredDict[k] = v
 		
 		if currentVal == None:
-			filteredDict["currentVal"] = con.MetricToRaw(float(SPN["initialValue"]), SPN["resolution"], SPN["offset"])
+			filteredDict["currentVal"] = con.MetricToRawRnd(float(SPN["initialValue"]), SPN["resolution"], SPN["offset"])
 		else:	
-			filteredDict["currentVal"] = con.MetricToRaw(float(currentVal), SPN["resolution"], SPN["offset"]) 
+			filteredDict["currentVal"] = con.MetricToRawRnd(float(currentVal), SPN["resolution"], SPN["offset"]) 
 			
 		return {"SPN": filteredDict}
 
