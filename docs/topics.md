@@ -111,8 +111,6 @@ SPN Format:
 
         "currentVal": int,  // New value of the SPN.
     }
-
-
 ```
 A dictionary must be created of the values and then passed into `payload=` when sending.
 
@@ -139,6 +137,8 @@ The `UpdateValue` topic will be sent from the extractor layer to the ui layer wh
 {
     "PGN": {
         "id": int,          // Integer ID of the PGN to be updated.
+
+        "sa": int,          // Source address of the PGN
     }
     "SPNArry": [{
         "id": int,          // Integer ID of the SPN to be updated.
@@ -153,16 +153,71 @@ A dictionary must be created of the values and then passed into `payload=` when 
 The `PgnWatch` topic will be sent from the extractor layer to the receiver layer to inform the layer of a new PGN to monitor when it is received.
 ```
 {
-    "id": int,          // Arbitration ID that will be monitored.  This includes the priority, DP, PGN, and SA
+    "arbitrationId": int,   // Arbitration ID that will be monitored.  This includes the PGN and SA
 }
 ```
+A dictionary must be created of the values and then passed into `payload=` when sending.
 
-### PgnUpdate
-The `PgnUpdate` topic will be sent from the receiver layer to the extractor layer when a PGN that has been monitored has been received.
+### ValueUpdate
+The `ValueUpdate` topic will be sent from the receiver layer to the extractor layer when a PGN that has been monitored has been received.
 ```
 {
-    "id": int,              // Arbitration ID that has been received.  This includes the priority, DP, PGN, and SA
+    "arbitrationId": int,   // Arbitration ID that has been received.  This includes the PGN and SA
 
     "payload": bytearray    // 8 bytes of data recevied within the message held within a bytearray
 }
 ```
+A dictionary must be created of the values and then passed into `payload=` when sending.
+
+### InitRead
+The `InitRead` topic will be sent from the UI layer down to the extractor layer to initialize reader.
+
+The init message passes and array of dictionaries that each contain the PGN dictionary and an array of SPN dictionaries.
+```
+
+initMsg Format:
+
+[
+    {"PGN":{}, "SPNArry":[{SPN},{SPN}]},
+    
+    {"PGN":{}, "SPNArry":[{SPN},{SPN}]},
+    
+    {"PGN":{}, "SPNArry":[{SPN},{SPN}]}
+]
+
+
+PGN Format:
+    
+    "PGN": 
+    {
+        "id": int,          // Integer ID of the PGN to be updated.
+        
+        "Label": string,    // String description of the PGN. 
+        
+        "simVisible": bool  // Bool to determine visibility in the UI
+
+        "sa": int,          // Source address that is being monitored
+    }
+
+
+SPN Format:
+
+    {
+        "Label": string,    // String description of the SPN. 
+
+        "simVisible": bool  // Bool to determine visibility in the UI
+
+        "id": int,          // Integer ID of the SPN to be updated.
+
+        "dataLngth": int,   // Length of data in number of bits (1-64).
+
+        "resolution": int,  // Resolution factor applied to the raw value.
+
+        "offset": int,      // Offset applied to the raw value.
+
+        "startBit": int,    // Starting bit of the SPN in the PGN message frame.
+
+        "unit": string      // String unit of measure for SPN value. 
+    }
+```
+A dictionary must be created of the values and then passed into `payload=` when sending.

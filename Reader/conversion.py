@@ -13,6 +13,7 @@ def RawToMetric(value, resolution, offset):
     val = float((value * resolution) + offset)
     log.debug("value=%d resolution=%f offset=%d NewVal=%f", value, resolution, offset, val)
     return val
+
 '''
     Name:   MetricToRaw
     Desc:   Takes the metric value and converts it back to the raw CAN message
@@ -25,6 +26,7 @@ def MetricToRaw(value, resolution, offset):
     val = int((value - offset) / resolution)
     log.debug("value=%d resolution=%f offset=%d NewVal=%f", value, resolution, offset, val)
     return val
+
 '''
     Name:   MetricToRawRnd
     Desc:   Takes the metric value and converts it back to the raw CAN message
@@ -41,6 +43,7 @@ def MetricToRawRnd(value, resolution, offset):
     raw = decimal.Decimal(val).quantize(decimal.Decimal('1'), rounding=decimal.ROUND_HALF_UP)
     log.debug("value=%d resolution=%f offset=%d NewVal=%f", value, resolution, offset, raw)
     return int(raw)
+
 '''
     Name:   MillisecondsToSeconds
     Desc:   Takes integer milliseconds and converts it to float seconds
