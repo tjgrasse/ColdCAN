@@ -94,9 +94,8 @@ def CheckLogging(logging, filename):
 
     if logging == True and config.ActiveLogging == False:
         if filename != None:
-            loggerFile = filename + ".asc"
-            log.debug("Logging CAN traffic in file %s", loggerFile)
-            config.Logger = can.ASCWriter(loggerFile)
+            log.debug("Logging CAN traffic in file %s", filename)
+            config.Logger = can.ASCWriter(filename)
             config.ActiveLogging = True
         else:
             log.error("Invalid filename for the logger, logging not activated")

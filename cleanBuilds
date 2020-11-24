@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Remove Previous Builds
+rm -rf builds/ builds.7z
+
+# Clean Reader
+cd Reader
+rm -rf build/ dist/ read.spec *.log *.asc
+cd ..
+
+# Clean Sim
+cd Sim
+rm -rf build/ dist/ sim.spec *.log
+cd ..
+
+# Create Builds Folder and copy over files
