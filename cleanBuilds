@@ -12,5 +12,3 @@ cd ..
 cd Sim
 rm -rf build/ dist/ sim.spec *.log
 cd ..
-
-# Create Builds Folder and copy over files
