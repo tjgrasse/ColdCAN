@@ -23,7 +23,7 @@ class simulatorWindow:
 
 	'''
     	Name:   initMainSimWindow
-    	Desc:   initialize main window by bulind main composition frame and calling builder functions.  
+    	Desc:   initialize main window by building main composition frame and calling config explorer function.  
     	Param:  Class variables: parent and PGUDict
     	Return: None
     	Ref: 	Event binding to allow a click anywhere in the UI to de-focus the entry is based off 
@@ -52,9 +52,10 @@ class simulatorWindow:
 
 
 	'''
-	    Name: 	 
-	    Desc: 	 
-	    Param:  None
+	    Name: 	__BrowseConfig 
+	    Desc: 	Creates file explorer for user to select config file.
+    	Param:  mainFrame - tkinter frame to contain the window frame, 
+    			configButton - tkinter button object
 	    Return: None
 	    Ref: https://www.geeksforgeeks.org/file-explorer-in-python-using-tkinter/
 	'''
@@ -68,17 +69,15 @@ class simulatorWindow:
 			self.__ChooseLogging(mainFrame)
 
 	'''
-	    Name: 	 
-	    Desc: 	 
-	    Param:  None
-	    Return: None
-	    Ref: 
+	    Name: 	__ChooseLogging 
+	    Desc: 	Builds propmt for user to select logging during session
+	    Param:  mainFrame - tkinter frame to contain the window frame
+	    Return: None 
 	'''
 	def __ChooseLogging(self, mainFrame):
 		titleFont = tkFont.Font(family="Helvetica",size=14)
 		self.promptFrame = ttk.Frame(self.mainFrame, padding=(30,20))
 		ttk.Label(self.promptFrame, text='Would you like to store the results of this session?', font = titleFont).pack(expand=1, fill=tk.X)
-		
 		
 		buttonFont = tkFont.Font(size=14,weight="bold")
 		self.buttonFrame = ttk.Frame(self.promptFrame, padding=(0,10))
@@ -86,16 +85,15 @@ class simulatorWindow:
 		self.yesButton.grid(row=1, column=1, sticky="ew", padx = 5)
 		self.noButton = tk.Button(self.buttonFrame, text = "No", font = buttonFont, command= lambda: self.__NoLogging(self.mainFrame, self.promptFrame))
 		self.noButton.grid(row=1, column=2, sticky="ew", padx = 5)
-
+		
 		self.buttonFrame.pack()
-
 		self.promptFrame.pack()
 	'''
-	    Name: 	 
-	    Desc: 	 
-	    Param:  None
+	    Name: 	__YesLogging	 
+	    Desc: 	Calls logging file path eplorer and hands down the logging request to lower layer 
+	    Param:  mainFrame - tkinter frame to contain the window frame,
+	    		promptFrame - tkinter frame to contain the prompt
 	    Return: None
-	    Ref: 
 	'''
 	def __YesLogging(self, mainFrame, promptFrame):
 		logFileName = filedialog.asksaveasfilename(initialdir = os.getcwd(), title = "SAVE LOG AS", filetypes = [("ASC File", "*.asc")])
@@ -106,9 +104,10 @@ class simulatorWindow:
 			self.__PopulateSim(mainFrame)
 
 	'''
-	    Name: 	 
-	    Desc: 	 
-	    Param:  None
+	    Name: 	__NoLogging 
+	    Desc: 	Clears window to load main UIand  hands down the logging request to lower layer 
+	    Param:  mainFrame - tkinter frame to contain the window frame,
+	    		promptFrame - tkinter frame to contain the prompt
 	    Return: None
 	    Ref: 
 	'''
@@ -119,9 +118,9 @@ class simulatorWindow:
 			self.__PopulateSim(mainFrame)
 
 	'''
-	    Name: 	 
-	    Desc: 	 
-	    Param:  None
+	    Name: 	__PopulateSim 
+	    Desc: 	initialize main window by building main composition frame and calling builder functions.
+	    Param:  mainFrame - tkinter frame to contain the window frame 
 	    Return: None
 	'''
 	def __PopulateSim(self, mainFrame):
