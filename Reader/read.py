@@ -7,6 +7,8 @@ from test import TestMain, StartBus
 import fileMgr as fM
 import tkinter as tk
 import rxUIbuilder as UI
+import config
+import base64
 
 import threading
 import logging as log
@@ -32,7 +34,10 @@ if __name__ == "__main__":
     # https://www.geeksforgeeks.org/iconphoto-method-in-tkinter-python/
     # The truck image was found at this site and is available for non-commercial use (we are educational)
     # https://www.hiclipart.com/free-transparent-background-png-clipart-dgeqn
-    image = tk.PhotoImage(file='images/truckR.png')
+    # Embedding the icon to prevent the issues that occur with pyinstaller found here
+    # https://stackoverflow.com/questions/9929479/embed-icon-in-python-script
+    decodedImage = base64.b64decode(config.ICON)
+    image = tk.PhotoImage(data=decodedImage)
     root.iconphoto(False, image)
     
     if SetupVirtualCanInterface() == 0:

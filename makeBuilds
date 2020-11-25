@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Remove Previous Builds
+rm -rf builds/ builds.7z
+
+# Clean then Build Reader
+cd Reader
+rm -rf build/ dist/ read.spec *.log *.asc
+python3 -O -m PyInstaller --onefile read.py
+cd ..
+
+# Clean then Build Sim
+cd Sim
+rm -rf build/ dist/ sim.spec *.log
+python3 -O -m PyInstaller --onefile sim.py
+cd ..
+
+# Create Builds Folder and copy over files
+mkdir builds
+cp Reader/dist/read builds/
+cp Sim/dist/sim builds/
+
+7za a builds.7z builds
