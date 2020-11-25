@@ -24,7 +24,7 @@ class simulatorWindow:
 
 	'''
     	Name:   initMainSimWindow
-    	Desc:   initialize main window by bulind main composition frame and calling builder functions.  
+    	Desc:   initialize main window by building main composition frame and calling config explorer functions.  
     	Param:  Class variables: parent and PGUDict
     	Return: None
     	Ref: 	Event binding to allow a click anywhere in the UI to de-focus the entry is based off 
@@ -51,9 +51,10 @@ class simulatorWindow:
 
 		
 	'''
-	    Name: 	 
-	    Desc: 	 
-	    Param:  None
+	    Name: 	__BrowseConfig 
+	    Desc: 	Creates file explorer for user to select config file.
+    	Param:  mainFrame - tkinter frame to contain the window frame, 
+    			configButton - tkinter button object
 	    Return: None
 	    Ref: https://www.geeksforgeeks.org/file-explorer-in-python-using-tkinter/
 	'''
@@ -69,9 +70,9 @@ class simulatorWindow:
 
 
 	'''
-	    Name: 	 
-	    Desc: 	 
-	    Param:  None
+	    Name: 	__PopulateSim 
+	    Desc: 	initialize main window by building main composition frame and calling builder functions.
+	    Param:  mainFrame - tkinter frame to contain the window frame 
 	    Return: None
 	'''
 	def __PopulateSim(self, mainFrame):
@@ -256,9 +257,9 @@ class simulatorWindow:
 		
 
 	'''
-	    Name: StartSim  
-	    Desc: 
-	    Param:  None
+	    Name: 	StartSim  
+	    Desc: 	Swaps formatting of button to change between start/stop
+	    Param:  startStopBtn - tkinter button object
 	    Return: None
 	'''
 	def __StartSim(self, startStopBtn):
@@ -269,9 +270,9 @@ class simulatorWindow:
 
 
 	'''
-	    Name: StartSim  
-	    Desc: 
-	    Param:  None
+	    Name: 	StopSim  
+	    Desc: 	Swaps formatting of button to change between start/stop
+	    Param:  startStopBtn - tkinter button object
 	    Return: None
 	'''
 	def __StopSim(self, startStopBtn):
