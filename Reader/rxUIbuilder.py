@@ -376,9 +376,10 @@ class simulatorWindow:
 
 
 	'''
-	    Name: 	UpdateValue
-	    Desc:   Passes a message down to initialize a specific SPN    
-	    Param:  PGUDict - dictonary object contianing all PGU data
+	    Name: 	__UpdateValue
+	    Desc:   When the a message comes up to update the UI this 
+	    		function accepts the message and updates the lable objects.   
+	    Param:  payload - Pup/Sub payload from middle layer. 
 	    Return: None
 	'''
 	def __UpdateValue(self, payload=None):
@@ -386,4 +387,5 @@ class simulatorWindow:
 		SPNDict = self.PGUDict[str(PGN)]["SPNDict"]
 		for SPN in payload['SPNArry']:
 			newVal = '{:f}'.format(decimal.Decimal(SPN["currentVal"]).normalize())
-			SPNDict[str(SPN['id'])]["UI_Objects"]["dispValLbl"].config(text=str(newVal))
+			newVal = self.__updateDispVal(SPNDict[str(SPN['id'])], newVal)
+			SPNDict[str(SPN['id'])]["UI_Objects"]["dispValLbl"].config(text=newVal)
