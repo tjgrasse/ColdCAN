@@ -8,4 +8,4 @@ The J1939 Reader is software that receives J1939 CAN data and displays the infor
 
 The applications utilize a configuration file to allow the user to add or remove whatever values they want to simulate and read the data that they want.  There are thousands of different values that can be used so the software utilizes the configuration file to dynamically load the values for the simulator and reader when the applications start.  This allows a single application to fit the needs of multiple people looking to utilize what it does.   
 ## Usage
-Please see ColdCANInstruction.pdf
+Please see docs/ColdCAN Instruction.pdf
