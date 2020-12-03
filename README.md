@@ -2,11 +2,10 @@
 ## Purpose
 The J1939 Simulator was created to send and receive J1939 CAN data to and from a CAN bus in a way that simulates what a semi would send while on the road.  The simulator takes the truck out of the equation for an engineer and allow them to utilize the simulator with a configurable UI so that they will be able to utilize any messages that are needed.  
 ## About
-The J1939 Simulator is written is Python utilizing the tkinter library to be able to create a UI for the user to alter values.  The UI is dynamic and will allow the user to create what is shown via a configuration file.  This file will provide the user a way to implement different information depending on what they are attempting to replicate.  There are standard values that could easily be used (speed and RPMs) but it would reduce the functionality to only utilize those values and not allow the user to test things like turn signals, headlights, or valve controller #4.  
-## Requirements
-These are the current python libraries that are required to utilize the software.
-- [python-can](https://python-can.readthedocs.io/en/master/installation.html)
-- [tkinter](https://docs.python.org/3/library/tkinter.html)
-- [pypubsub](https://pypubsub.readthedocs.io/en/v4.0.3/)
-## Setup
+The J1939 Simulator is software that replicates the J1939 CAN data that is processed and submitted by engine components within vehicles.  The software will create information and submit it out onto a CAN bus in a similar fashion as would be found in a vehicle.  
+
+The J1939 Reader is software that receives J1939 CAN data and displays the information that the user has specified that they would like to observe. The Reader will monitor the bus for information, when they see some they will check if it fits the criteria within the confirmation file, and if it matches the data will be displayed to the user.
+
+The applications utilize a configuration file to allow the user to add or remove whatever values they want to simulate and read the data that they want.  There are thousands of different values that can be used so the software utilizes the configuration file to dynamically load the values for the simulator and reader when the applications start.  This allows a single application to fit the needs of multiple people looking to utilize what it does.   
 ## Usage
+Please see docs/ColdCAN Instruction.pdf
